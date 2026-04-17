@@ -1,0 +1,20 @@
+{
+  "appId": "com.ga17.serial-port",
+  "productName": "GA17 Serial Port",
+  "directories": {
+    "output": "dist"
+  },
+  "win": {
+    "target": [
+      {
+        "target": "portable",
+        "arch": ["x64"]
+      }
+    ],
+    "icon": "assets/icon.ico"
+  },
+  "files": [
+    "src/**/*",
+    "assets/**/*"
+  ]
+}
