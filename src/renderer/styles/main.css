@@ -325,6 +325,23 @@ body {
     padding: 8px;
 }
 
+/* 侧边栏视图 */
+.sidebar-view {
+    display: none;
+    flex-direction: column;
+    height: 100%;
+}
+
+.sidebar-view.active {
+    display: flex;
+}
+
+.view-placeholder {
+    color: #858585;
+    font-size: 13px;
+    padding: 8px;
+}
+
 /* 底部面板样式 */
 .panel-tabs {
     display: flex;

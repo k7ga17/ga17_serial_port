@@ -10,21 +10,62 @@ document.addEventListener('DOMContentLoaded', () => {
     const activityIcons = document.querySelectorAll('.activity-icon');
 
     // ============ 活动栏交互 ============
+    let currentView = 'explorer';
+    let isSidebarVisible = false;
+
     activityIcons.forEach(icon => {
         icon.addEventListener('click', () => {
-            // 切换活动图标激活状态
+            const viewName = icon.dataset.view;
+
+            // 如果点击的是当前激活的视图，则切换侧边栏显示/隐藏
+            if (currentView === viewName && isSidebarVisible) {
+                sidebar.classList.remove('visible');
+                isSidebarVisible = false;
+                // 收起时移除选中效果
+                activityIcons.forEach(i => i.classList.remove('active'));
+                // 同步按钮状态
+                syncButtonState(toggleSidebarBtn, sidebar, false);
+                return;
+            }
+
+            // 更新激活状态
             activityIcons.forEach(i => i.classList.remove('active'));
             icon.classList.add('active');
+
+            // 切换视图内容
+            document.querySelectorAll('.sidebar-view').forEach(view => {
+                view.classList.remove('active');
+            });
+            const targetView = document.getElementById('view-' + viewName);
+            if (targetView) {
+                targetView.classList.add('active');
+            }
+
+            // 显示侧边栏
+            sidebar.classList.add('visible');
+            isSidebarVisible = true;
+            currentView = viewName;
+            // 同步按钮状态
+            syncButtonState(toggleSidebarBtn, sidebar, true);
         });
     });
 
     // ============ 布局控制按钮 ============
+    // 同步按钮状态与面板显示状态
+    function syncButtonState(btn, panel, isVisible) {
+        if (isVisible) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    }
+
     // 确保元素存在后再绑定事件
     if (toggleSidebarBtn) {
         toggleSidebarBtn.addEventListener('click', () => {
             if (sidebar) {
                 sidebar.classList.toggle('visible');
-                toggleSidebarBtn.classList.toggle('active');
+                syncButtonState(toggleSidebarBtn, sidebar, sidebar.classList.contains('visible'));
             }
         });
     }
@@ -33,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
         togglePanelBtn.addEventListener('click', () => {
             if (panel) {
                 panel.classList.toggle('visible');
-                togglePanelBtn.classList.toggle('active');
+                syncButtonState(togglePanelBtn, panel, panel.classList.contains('visible'));
             }
         });
     }
@@ -42,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleAuxBarBtn.addEventListener('click', () => {
             if (auxBar) {
                 auxBar.classList.toggle('visible');
-                toggleAuxBarBtn.classList.toggle('active');
+                syncButtonState(toggleAuxBarBtn, auxBar, auxBar.classList.contains('visible'));
             }
         });
     }
