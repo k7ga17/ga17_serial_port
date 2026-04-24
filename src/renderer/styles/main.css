@@ -48,6 +48,71 @@ body {
     color: #cccccc;
 }
 
+/* ============ 布局控制按钮 ============ */
+#layoutButtons {
+    display: flex;
+    height: 100%;
+    -webkit-app-region: no-drag;
+}
+
+.layoutBtn {
+    width: 36px;
+    height: 100%;
+    border: none;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.1s;
+}
+
+.layoutBtn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.layoutBtn:active {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.layoutBtn svg path {
+    fill: #858585 !important;
+    transition: fill 0.1s;
+}
+
+.layoutBtn:hover svg path {
+    fill: #cccccc !important;
+}
+
+.layoutBtn.active svg path {
+    fill: #cccccc !important;
+}
+
+.layoutBtn .icon-open {
+    display: none;
+}
+
+.layoutBtn .icon-closed {
+    display: block;
+}
+
+.layoutBtn.active .icon-open {
+    display: block;
+}
+
+.layoutBtn.active .icon-closed {
+    display: none;
+}
+
+/* 分隔线 */
+.divider {
+    width: 1px;
+    height: 16px;
+    background: #3c3c3c;
+    margin: 0 4px;
+    align-self: center;
+}
+
 /* ============ 窗口控制按钮 ============ */
 #windowControls {
     display: flex;

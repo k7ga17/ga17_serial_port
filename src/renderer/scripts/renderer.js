@@ -1,5 +1,24 @@
 // 渲染进程脚本
 document.addEventListener('DOMContentLoaded', () => {
+    // ============ 布局控制按钮 ============
+    const layoutButtons = document.querySelectorAll('.layoutBtn');
+
+    layoutButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // 单例切换：点击当前已激活的按钮则取消激活
+            if (btn.classList.contains('active')) {
+                btn.classList.remove('active');
+            } else {
+                // 取消其他按钮的激活状态
+                layoutButtons.forEach(b => b.classList.remove('active'));
+                // 激活当前按钮
+                btn.classList.add('active');
+            }
+            // 发送按钮点击事件到主进程
+            window.electronAPI.sendLayoutToggle(btn.id);
+        });
+    });
+
     // ============ 窗口控制 ============
     const minimizeBtn = document.getElementById('minimizeBtn');
     const maximizeBtn = document.getElementById('maximizeBtn');

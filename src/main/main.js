@@ -76,3 +76,9 @@ ipcMain.on('window-close', () => {
 ipcMain.handle('window-is-maximized', () => {
     return mainWindow ? mainWindow.isMaximized() : false;
 });
+
+// 布局控制按钮点击事件
+ipcMain.on('layout-toggle', (event, buttonId) => {
+    console.log(`Layout toggle: ${buttonId}`);
+    // 这里可以添加布局切换的逻辑
+});
