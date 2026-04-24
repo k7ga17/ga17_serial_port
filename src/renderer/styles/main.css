@@ -1,696 +1,103 @@
-/* VSCode 风格主题 */
-:root {
-  --bg-dark: #1e1e1e;
-  --bg-dark-2: #252526;
-  --bg-dark-3: #2d2d2d;
-  --bg-dark-4: #3c3c3c;
-  --border-color: #3c3c3c;
-  --text-primary: #cccccc;
-  --text-secondary: #808080;
-  --text-bright: #ffffff;
-  --accent-blue: #007acc;
-  --accent-blue-hover: #1e8ad2;
-  --accent-green: #4ec9b0;
-  --accent-yellow: #dcdcaa;
-  --accent-orange: #ce9178;
-  --accent-red: #f14c4c;
-  --hover-bg: #2a2d2e;
-  --selection-bg: #094771;
-}
-
+/* ============ 重置与基础 ============ */
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
+html,
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
-  font-size: 13px;
-  color: var(--text-primary);
-  background: var(--bg-dark);
-  overflow: hidden;
-  height: 100vh;
-  user-select: none;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family:
+        -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 14px;
+    color: #cccccc;
+    background: #1e1e1e;
+    user-select: none;
 }
 
+/* ============ 应用容器 ============ */
 #app {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
 }
 
 /* ============ 标题栏 ============ */
-.title-bar {
-  height: 30px;
-  background: var(--bg-dark-2);
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid var(--border-color);
-  -webkit-app-region: drag;
-  flex-shrink: 0;
+#titleBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 32px;
+    background: #323233;
+    border-bottom: 1px solid #181818;
+    -webkit-app-region: drag;
 }
 
-.title-bar-menu {
-  display: flex;
-  -webkit-app-region: no-drag;
-  padding-left: 10px;
+#titleMenu {
+    display: flex;
+    align-items: center;
+    padding-left: 12px;
 }
 
-.menu-item {
-  padding: 0 10px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  font-size: 13px;
-  color: var(--text-primary);
-  cursor: pointer;
+.titleText {
+    font-size: 12px;
+    color: #cccccc;
 }
 
-.menu-item:hover {
-  background: var(--hover-bg);
+/* ============ 窗口控制按钮 ============ */
+#windowControls {
+    display: flex;
+    height: 100%;
+    -webkit-app-region: no-drag;
 }
 
-.title-bar-drag {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.iconBtn {
+    width: 46px;
+    height: 100%;
+    border: none;
+    background: transparent;
+    color: #cccccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.1s;
 }
 
-.app-title {
-  font-size: 13px;
-  color: var(--text-primary);
+.iconBtn svg {
+    fill: currentColor;
 }
 
-.window-controls {
-  display: flex;
-  -webkit-app-region: no-drag;
+.iconBtn:hover {
+    background: rgba(255, 255, 255, 0.1);
 }
 
-.window-btn {
-  width: 46px;
-  height: 30px;
-  border: none;
-  background: transparent;
-  color: var(--text-primary);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.1s;
+.iconBtn:active {
+    background: rgba(255, 255, 255, 0.15);
 }
 
-.window-btn:hover {
-  background: var(--hover-bg);
+.closeBtn:hover {
+    background: #e81123;
+    color: #ffffff;
 }
 
-.close-btn:hover {
-  background: #e81123;
-  color: white;
+.closeBtn:active {
+    background: #c50f1f;
+    color: #ffffff;
 }
 
-/* ============ 主容器 - 三栏布局 ============ */
-.main-container {
-  display: flex;
-  flex: 1;
-  overflow: hidden;
-  position: relative;
+/* 隐藏/显示图标 */
+.hidden {
+    display: none;
 }
 
-/* ============ 左侧边栏 ============ */
-.sidebar-left {
-  display: flex;
-  width: 240px;
-  background: var(--bg-dark-2);
-  border-right: 1px solid var(--border-color);
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-}
-
-.sidebar-left.collapsed {
-  width: 48px;
-}
-
-.sidebar-left.collapsed .sidebar-panel-content {
-  display: none;
-}
-
-/* ============ 活动栏 ============ */
-.activity-bar {
-  width: 48px;
-  background: var(--bg-dark-2);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-top: 4px;
-  border-right: 1px solid var(--border-color);
-  flex-shrink: 0;
-}
-
-.activity-icon {
-  width: 48px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: var(--text-secondary);
-  position: relative;
-  transition: color 0.1s;
-}
-
-.activity-icon:hover {
-  color: var(--text-primary);
-}
-
-.activity-icon.active {
-  color: var(--text-bright);
-}
-
-.activity-icon.active::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: var(--accent-blue);
-}
-
-.activity-icon svg {
-  width: 24px;
-  height: 24px;
-}
-
-.activity-spacer {
-  flex: 1;
-}
-
-/* ============ 左侧面板内容 ============ */
-.sidebar-panel-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.sidebar-panel {
-  display: none;
-  flex-direction: column;
-  flex: 1;
-  overflow: hidden;
-}
-
-.sidebar-panel.active {
-  display: flex;
-}
-
-.panel-header {
-  height: 35px;
-  padding: 0 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text-secondary);
-  border-bottom: 1px solid var(--border-color);
-  flex-shrink: 0;
-}
-
-.panel-actions {
-  display: flex;
-  gap: 4px;
-}
-
-.panel-action {
-  width: 24px;
-  height: 24px;
-  border: none;
-  background: transparent;
-  color: var(--text-secondary);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 3px;
-  transition: all 0.1s;
-}
-
-.panel-action:hover {
-  background: var(--hover-bg);
-  color: var(--text-primary);
-}
-
-.panel-action svg {
-  width: 16px;
-  height: 16px;
-}
-
-/* ============ 串口设置面板 ============ */
-.serial-settings {
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  overflow-y: auto;
-}
-
-.setting-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.setting-row label {
-  min-width: 50px;
-  color: var(--text-secondary);
-  font-size: 12px;
-}
-
-.vs-select {
-  flex: 1;
-  height: 28px;
-  padding: 0 8px;
-  background: var(--bg-dark);
-  border: 1px solid var(--border-color);
-  border-radius: 3px;
-  color: var(--text-primary);
-  font-size: 12px;
-  cursor: pointer;
-}
-
-.vs-select:focus {
-  outline: none;
-  border-color: var(--accent-blue);
-}
-
-.vs-button {
-  height: 32px;
-  padding: 0 16px;
-  border: none;
-  border-radius: 3px;
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.1s;
-}
-
-.vs-button.primary {
-  background: var(--accent-blue);
-  color: white;
-}
-
-.vs-button.primary:hover {
-  background: var(--accent-blue-hover);
-}
-
-.connect-btn {
-  margin-top: 8px;
-}
-
-/* ============ 历史记录面板 ============ */
-.history-list {
-  flex: 1;
-  overflow-y: auto;
-  padding: 8px;
-}
-
-.history-empty {
-  color: var(--text-secondary);
-  text-align: center;
-  padding: 20px;
-  font-size: 12px;
-}
-
-/* ============ 设置面板 ============ */
-.settings-content {
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-/* ============ 中间编辑区 ============ */
-.editor-area {
-  position: absolute;
-  left: 328px;
-  right: 260px;
-  top: 0;
-  bottom: 0;
-  display: flex;
-  flex-direction: column;
-  background: var(--bg-dark);
-  overflow: hidden;
-}
-
-.editor-toolbar {
-  height: 40px;
-  background: var(--bg-dark-2);
-  border-bottom: 1px solid var(--border-color);
-  display: flex;
-  align-items: center;
-  padding: 0 12px;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
-.toolbar-btn {
-  height: 28px;
-  padding: 0 10px;
-  background: transparent;
-  border: none;
-  color: var(--text-primary);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  border-radius: 3px;
-  font-size: 12px;
-  transition: background 0.1s;
-}
-
-.toolbar-btn:hover {
-  background: var(--hover-bg);
-}
-
-.toolbar-btn svg {
-  width: 16px;
-  height: 16px;
-}
-
-.toolbar-divider {
-  width: 1px;
-  height: 20px;
-  background: var(--border-color);
-  margin: 0 8px;
-}
-
-.toolbar-checkbox {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  color: var(--text-secondary);
-  cursor: pointer;
-}
-
-.toolbar-checkbox input {
-  cursor: pointer;
-}
-
-/* ============ 数据区 ============ */
-.data-container {
-  flex: 1;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.data-area {
-  flex: 1;
-  padding: 12px;
-  overflow-y: auto;
-  font-family: 'Consolas', 'Monaco', monospace;
-  font-size: 13px;
-  line-height: 1.5;
-  background: var(--bg-dark);
-}
-
-.data-placeholder {
-  color: var(--text-secondary);
-  text-align: center;
-  padding: 40px;
-}
-
-.data-line {
-  display: flex;
-  gap: 8px;
-  padding: 2px 0;
-}
-
-.data-time {
-  color: var(--text-secondary);
-  flex-shrink: 0;
-}
-
-.data-receive {
-  color: var(--accent-green);
-  word-break: break-all;
-}
-
-.data-send {
-  color: var(--accent-yellow);
-  word-break: break-all;
-}
-
-.data-error {
-  color: var(--accent-red);
-}
-
-/* ============ 右侧边栏 ============ */
-.sidebar-right {
-  width: 260px;
-  background: var(--bg-dark-2);
-  border-left: 1px solid var(--border-color);
-  display: flex;
-  flex-direction: column;
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-}
-
-.sidebar-right.collapsed {
-  width: 0;
-  overflow: hidden;
-  border-left: none;
-}
-
-.sidebar-right-header {
-  height: 35px;
-  padding: 0 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text-secondary);
-  border-bottom: 1px solid var(--border-color);
-  flex-shrink: 0;
-}
-
-.sidebar-right-header .close-btn {
-  width: 24px;
-  height: 24px;
-  border: none;
-  background: transparent;
-  color: var(--text-secondary);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 3px;
-  transition: all 0.1s;
-}
-
-.sidebar-right-header .close-btn:hover {
-  background: var(--hover-bg);
-  color: var(--text-primary);
-}
-
-.sidebar-right-header .close-btn svg {
-  width: 14px;
-  height: 14px;
-}
-
-.sidebar-right-content {
-  flex: 1;
-  overflow-y: auto;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-/* 发送设置 */
-.send-settings {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.send-setting-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.send-setting-row label {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  color: var(--text-secondary);
-  cursor: pointer;
-}
-
-.vs-select.small {
-  width: 70px;
-  flex: none;
-}
-
-.connection-indicator {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-}
-
-.status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
-
-.status-dot.connected {
-  background: var(--accent-green);
-}
-
-.status-dot.disconnected {
-  background: var(--text-secondary);
-}
-
-/* 发送输入区 */
-.send-input-area {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.send-textarea {
-  width: 100%;
-  height: 80px;
-  padding: 8px;
-  background: var(--bg-dark);
-  border: 1px solid var(--border-color);
-  border-radius: 3px;
-  color: var(--text-primary);
-  font-family: inherit;
-  font-size: 13px;
-  resize: none;
-}
-
-.send-textarea:focus {
-  outline: none;
-  border-color: var(--accent-blue);
-}
-
-.send-btn-full {
-  width: 100%;
-}
-
-/* 常用命令 */
-.quick-commands {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.quick-commands-header {
-  font-size: 11px;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-  letter-spacing: 0.5px;
-}
-
-.quick-command-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.quick-command-btn {
-  padding: 4px 10px;
-  background: var(--bg-dark-3);
-  border: 1px solid var(--border-color);
-  border-radius: 3px;
-  color: var(--text-primary);
-  font-size: 11px;
-  cursor: pointer;
-  transition: all 0.1s;
-}
-
-.quick-command-btn:hover {
-  background: var(--hover-bg);
-  border-color: var(--accent-blue);
-}
-
-/* ============ 状态栏 ============ */
-.status-bar {
-  height: 22px;
-  background: var(--accent-blue);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 10px;
-  flex-shrink: 0;
-}
-
-.status-left, .status-right {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.status-item {
-  font-size: 12px;
-  color: white;
-}
-
-/* ============ 拖动条 ============ */
-.resize-handle {
-  position: absolute;
-  z-index: 100;
-  background: transparent;
-  transition: background 0.15s;
-}
-
-.resize-handle:hover {
-  background: rgba(0, 122, 204, 0.5) !important;
-}
-
-.resize-handle-left {
-  width: 4px;
-  height: 100%;
-  cursor: ew-resize;
-}
-
-.resize-handle-right {
-  width: 4px;
-  height: 100%;
-  cursor: ew-resize;
-}
-
-/* 滚动条样式 */
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--bg-dark);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--bg-dark-4);
-  border-radius: 5px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--text-secondary);
+/* ============ 内容区 ============ */
+#contentArea {
+    flex: 1;
+    overflow: hidden;
+    background: #1e1e1e;
 }

@@ -1,250 +1,50 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';">
-  <title>Serial Monitor</title>
-  <link rel="stylesheet" href="styles/main.css">
-</head>
-<body>
-  <div id="app">
-    <!-- 标题栏 -->
-    <div class="title-bar" id="titleBar">
-      <div class="title-bar-menu">
-        <span class="menu-item">文件</span>
-        <span class="menu-item">编辑</span>
-        <span class="menu-item">视图</span>
-        <span class="menu-item">帮助</span>
-      </div>
-      <div class="title-bar-drag">
-        <span class="app-title">Serial Monitor</span>
-      </div>
-      <div class="window-controls">
-        <button class="window-btn minimize-btn" id="minimizeBtn" title="最小化">
-          <svg width="12" height="12" viewBox="0 0 12 12"><rect y="5" width="10" height="1" fill="currentColor"/></svg>
-        </button>
-        <button class="window-btn maximize-btn" id="maximizeBtn" title="最大化">
-          <svg width="12" height="12" viewBox="0 0 12 12"><rect x="1" y="1" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1"/></svg>
-        </button>
-        <button class="window-btn close-btn" id="closeBtn" title="关闭">
-          <svg width="12" height="12" viewBox="0 0 12 12"><path d="M1 1L11 11M11 1L1 11" stroke="currentColor" stroke-width="1.5"/></svg>
-        </button>
-      </div>
-    </div>
-
-    <!-- 主容器 - 三栏布局 -->
-    <div class="main-container" id="mainContainer">
-      <!-- 左侧边栏 -->
-      <div class="sidebar-left" id="sidebarLeft">
-        <!-- 活动栏 -->
-        <div class="activity-bar">
-          <div class="activity-icon" data-panel="serial" title="串口设置">
-            <svg viewBox="0 0 24 24"><path d="M4 4h16v16H4V4zm2 2v12h12V6H6zm2 2h8v2H8V8zm0 4h8v2H8v-2z" fill="currentColor"/></svg>
-          </div>
-          <div class="activity-icon" data-panel="explorer" title="历史记录">
-            <svg viewBox="0 0 24 24"><path d="M13 3a9 9 0 00-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0013 21a9 9 0 000-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z" fill="currentColor"/></svg>
-          </div>
-          <div class="activity-spacer"></div>
-          <div class="activity-icon" data-panel="settings" title="设置">
-            <svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" fill="currentColor"/></svg>
-          </div>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta
+            http-equiv="Content-Security-Policy"
+            content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';"
+        />
+        <title>Serial Monitor</title>
+        <link rel="stylesheet" href="styles/main.css" />
+    </head>
+    <body>
+        <div id="app">
+            <!-- 标题栏 -->
+            <div id="titleBar">
+                <div id="titleMenu">
+                    <span class="titleText">Serial Monitor</span>
+                </div>
+                <div id="windowControls">
+                    <button id="minimizeBtn" class="iconBtn" title="最小化">
+                        <svg viewBox="0 0 12 12" width="12" height="12">
+                            <rect x="1" y="5.5" width="10" height="1" fill="currentColor"/>
+                        </svg>
+                    </button>
+                    <button id="maximizeBtn" class="iconBtn" title="最大化">
+                        <svg id="maximizeIcon" viewBox="0 0 12 12" width="12" height="12">
+                            <rect x="1.5" y="1.5" width="9" height="9" fill="none" stroke="currentColor" stroke-width="1"/>
+                        </svg>
+                        <svg id="restoreIcon" class="hidden" viewBox="0 0 12 12" width="12" height="12">
+                            <rect x="2.5" y="3.5" width="6" height="6" fill="none" stroke="currentColor" stroke-width="1"/>
+                            <path d="M3.5 3.5 V1.5 H10.5 V8.5 H8.5" fill="none" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <button id="closeBtn" class="iconBtn closeBtn" title="关闭">
+                        <svg viewBox="0 0 12 12" width="12" height="12">
+                            <path d="M1.5 1.5 L10.5 10.5 M10.5 1.5 L1.5 10.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <!-- 主内容区 -->
+            <div id="contentArea">
+                <!-- 空内容区域 -->
+            </div>
         </div>
 
-        <!-- 左侧面板内容 -->
-        <div class="sidebar-panel-content">
-          <!-- 串口设置面板 -->
-          <div class="sidebar-panel active" id="serialPanel">
-            <div class="panel-header">
-              <span>串口设置</span>
-              <div class="panel-actions">
-                <button class="panel-action" id="refreshSerialBtn" title="刷新串口">
-                  <svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" fill="currentColor"/></svg>
-                </button>
-              </div>
-            </div>
-            <div class="serial-settings">
-              <div class="setting-row">
-                <label>端口:</label>
-                <select id="portSelect" class="vs-select">
-                  <option value="">选择串口...</option>
-                </select>
-              </div>
-              <div class="setting-row">
-                <label>波特率:</label>
-                <select id="baudSelect" class="vs-select">
-                  <option value="9600">9600</option>
-                  <option value="19200">19200</option>
-                  <option value="38400">38400</option>
-                  <option value="57600">57600</option>
-                  <option value="115200" selected>115200</option>
-                </select>
-              </div>
-              <div class="setting-row">
-                <label>数据位:</label>
-                <select id="dataBitsSelect" class="vs-select">
-                  <option value="8" selected>8</option>
-                  <option value="7">7</option>
-                  <option value="6">6</option>
-                </select>
-              </div>
-              <div class="setting-row">
-                <label>停止位:</label>
-                <select id="stopBitsSelect" class="vs-select">
-                  <option value="1" selected>1</option>
-                  <option value="2">2</option>
-                </select>
-              </div>
-              <div class="setting-row">
-                <label>校验位:</label>
-                <select id="paritySelect" class="vs-select">
-                  <option value="none" selected>None</option>
-                  <option value="even">Even</option>
-                  <option value="odd">Odd</option>
-                </select>
-              </div>
-              <button id="connectBtn" class="vs-button primary connect-btn">连接串口</button>
-            </div>
-          </div>
-
-          <!-- 历史记录面板 -->
-          <div class="sidebar-panel" id="explorerPanel">
-            <div class="panel-header">
-              <span>历史记录</span>
-            </div>
-            <div class="history-list" id="historyList">
-              <div class="history-empty">暂无历史记录</div>
-            </div>
-          </div>
-
-          <!-- 设置面板 -->
-          <div class="sidebar-panel" id="settingsPanel">
-            <div class="panel-header">
-              <span>设置</span>
-            </div>
-            <div class="settings-content">
-              <div class="setting-row">
-                <label>显示模式:</label>
-                <select id="displayMode" class="vs-select">
-                  <option value="hex">HEX</option>
-                  <option value="text">文本</option>
-                  <option value="mixed">混合</option>
-                </select>
-              </div>
-              <div class="setting-row">
-                <label><input type="checkbox" id="timestamp" checked /> 时间戳</label>
-              </div>
-              <div class="setting-row">
-                <label><input type="checkbox" id="autoScroll" checked /> 自动滚动</label>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 中间主区域 - 串口数据 -->
-      <div class="editor-area" id="editorArea">
-        <!-- 工具栏 -->
-        <div class="editor-toolbar">
-          <button id="clearBtn" class="toolbar-btn" title="清空">
-            <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" fill="currentColor"/></svg>
-            <span>清空</span>
-          </button>
-          <button id="saveBtn" class="toolbar-btn" title="保存">
-            <svg viewBox="0 0 24 24"><path d="M17 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm2 16H5V5h11.17L19 7.83V19zm-7-7c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" fill="currentColor"/></svg>
-            <span>保存</span>
-          </button>
-          <div class="toolbar-divider"></div>
-          <label class="toolbar-checkbox">
-            <input type="checkbox" id="hexDisplay" />
-            <span>HEX</span>
-          </label>
-          <label class="toolbar-checkbox">
-            <input type="checkbox" id="timestampMain" checked />
-            <span>时间戳</span>
-          </label>
-          <label class="toolbar-checkbox">
-            <input type="checkbox" id="autoScrollMain" checked />
-            <span>自动滚动</span>
-          </label>
-        </div>
-
-        <!-- 数据区 -->
-        <div class="data-container">
-          <div id="dataArea" class="data-area">
-            <div class="data-placeholder">
-              <span>等待接收数据...</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 右侧边栏 - 发送命令 -->
-      <div class="sidebar-right" id="sidebarRight">
-        <div class="sidebar-right-header">
-          <span>发送命令</span>
-          <button class="panel-action close-btn" id="closeRightSidebarBtn" title="关闭 (Ctrl+Alt+B)">
-            <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor"/></svg>
-          </button>
-        </div>
-        <div class="sidebar-right-content">
-          <!-- 发送设置 -->
-          <div class="send-settings">
-            <div class="send-setting-row">
-              <label>
-                <input type="checkbox" id="newlineSelect" checked />
-                <span>发送换行</span>
-              </label>
-              <select id="newlineType" class="vs-select small">
-                <option value="rn">\r\n</option>
-                <option value="n">\n</option>
-                <option value="r">\r</option>
-              </select>
-            </div>
-            <div class="connection-indicator" id="connectionIndicator">
-              <span class="status-dot disconnected"></span>
-              <span id="connStatusText">未连接</span>
-            </div>
-          </div>
-          
-          <!-- 发送输入 -->
-          <div class="send-input-area">
-            <textarea id="sendInput" class="send-textarea" placeholder="输入要发送的命令..."></textarea>
-            <button id="sendBtn" class="vs-button primary send-btn-full">
-              <span>发送</span>
-            </button>
-          </div>
-
-          <!-- 常用命令 -->
-          <div class="quick-commands">
-            <div class="quick-commands-header">常用命令</div>
-            <div class="quick-command-list">
-              <button class="quick-command-btn" data-cmd="AT">AT</button>
-              <button class="quick-command-btn" data-cmd="AT+GMR">AT+GMR</button>
-              <button class="quick-command-btn" data-cmd="AT+RST">AT+RST</button>
-              <button class="quick-command-btn" data-cmd="AT+CWLAP">AT+CWLAP</button>
-              <button class="quick-command-btn" data-cmd="ATE0">ATE0</button>
-              <button class="quick-command-btn" data-cmd="ATE1">ATE1</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 状态栏 -->
-    <div class="status-bar">
-      <div class="status-left">
-        <span class="status-item" id="statusIcon">⚡</span>
-        <span class="status-item" id="statusMessage">就绪</span>
-      </div>
-      <div class="status-right">
-        <span class="status-item" id="statusBaud">115200</span>
-        <span class="status-item">UTF-8</span>
-        <span class="status-item">LF</span>
-      </div>
-    </div>
-  </div>
-
-  <script src="scripts/renderer.js"></script>
-</body>
+        <script src="scripts/renderer.js"></script>
+    </body>
 </html>
