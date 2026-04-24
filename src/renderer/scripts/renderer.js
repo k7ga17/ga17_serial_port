@@ -161,4 +161,326 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // ============ 串口配置功能 ============
+    const portSelect = document.getElementById('serial-port');
+    const baudRateSelect = document.getElementById('baud-rate-select');
+    const baudRateInput = document.getElementById('baud-rate-input');
+    const dataBitsSelect = document.getElementById('data-bits');
+    const stopBitsSelect = document.getElementById('stop-bits');
+    const paritySelect = document.getElementById('parity');
+    const flowControlSelect = document.getElementById('flow-control');
+    const refreshPortsBtn = document.getElementById('refresh-ports-btn');
+    const connectBtn = document.getElementById('connect-btn');
+
+    // 终端相关元素
+    const terminalOutput = document.getElementById('terminal-output');
+    const serialInput = document.getElementById('serial-input');
+    const sendBtn = document.getElementById('send-btn');
+    const clearTerminalBtn = document.getElementById('clear-terminal-btn');
+
+    let isConnected = false;
+
+    // 波特率切换逻辑
+    function initBaudRateToggle() {
+        baudRateSelect.addEventListener('change', () => {
+            if (baudRateSelect.value === 'custom') {
+                baudRateSelect.style.display = 'none';
+                baudRateInput.style.display = 'block';
+                baudRateInput.focus();
+                baudRateInput.value = '';
+            }
+        });
+
+        baudRateInput.addEventListener('blur', () => {
+            if (baudRateInput.value === '') {
+                baudRateSelect.style.display = 'block';
+                baudRateInput.style.display = 'none';
+                baudRateSelect.value = '115200';
+            }
+        });
+
+        baudRateInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                if (baudRateInput.value !== '') {
+                    baudRateSelect.style.display = 'block';
+                    baudRateInput.style.display = 'none';
+                }
+            }
+        });
+    }
+
+    // 获取当前波特率值
+    function getBaudRate() {
+        if (baudRateSelect.value === 'custom') {
+            return baudRateInput.value || '115200';
+        }
+        return baudRateSelect.value;
+    }
+
+    // 刷新串口列表
+    async function refreshPorts() {
+        try {
+            const ports = await window.electronAPI.serial.list();
+            portSelect.innerHTML = '<option value="">Select Port...</option>';
+            ports.forEach(port => {
+                const option = document.createElement('option');
+                option.value = port.path;
+                option.textContent = port.path;
+                portSelect.appendChild(option);
+            });
+            updateConnectButton();
+        } catch (error) {
+            console.error('Failed to refresh ports:', error);
+        }
+    }
+
+    // 更新连接按钮状态
+    function updateConnectButton() {
+        if (isConnected) {
+            connectBtn.innerHTML = `
+                <svg viewBox="0 0 16 16" width="14" height="14">
+                    <path fill="currentColor" d="M4.5 2A1.5 1.5 0 0 0 3 3.5v9A1.5 1.5 0 0 0 4.5 14h7a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 11.5 2h-7zM4 3.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5v-9z"/>
+                    <path fill="currentColor" d="M6 8h4v2H6z"/>
+                </svg>
+                Disconnect`;
+            connectBtn.classList.add('connected');
+            connectBtn.disabled = false;
+        } else {
+            connectBtn.innerHTML = `
+                <svg viewBox="0 0 16 16" width="14" height="14">
+                    <path fill="currentColor" d="M4 3.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5v-9zm.5 1v7h6V4.5h-6z"/>
+                </svg>
+                Connect`;
+            connectBtn.classList.remove('connected');
+            connectBtn.disabled = !portSelect.value;
+        }
+    }
+
+    // 连接/断开串口
+    async function toggleConnection() {
+        if (isConnected) {
+            // 断开连接
+            try {
+                await window.electronAPI.serial.close();
+                isConnected = false;
+                updateConnectButton();
+                // 禁用配置选项
+                setConfigDisabled(false);
+            } catch (error) {
+                console.error('Failed to close port:', error);
+            }
+        } else {
+            // 建立连接
+            const port = portSelect.value;
+            if (!port) return;
+
+            try {
+                const result = await window.electronAPI.serial.open({
+                    path: port,
+                    baudRate: getBaudRate(),
+                    dataBits: dataBitsSelect.value,
+                    stopBits: stopBitsSelect.value,
+                    parity: paritySelect.value,
+                    flowControl: flowControlSelect.value
+                });
+
+                if (result.success) {
+                    isConnected = true;
+                    updateConnectButton();
+                    // 禁用配置选项
+                    setConfigDisabled(true);
+                    // 显示连接成功消息
+                    const port = portSelect.value;
+                    const baud = getBaudRate();
+                    appendToTerminal(`Connected to ${port} @ ${baud} baud`, 'system');
+                }
+            } catch (error) {
+                console.error('Failed to open port:', error);
+            }
+        }
+    }
+
+    // 设置配置选项禁用状态
+    function setConfigDisabled(disabled) {
+        baudRateSelect.disabled = disabled;
+        baudRateInput.disabled = disabled;
+        dataBitsSelect.disabled = disabled;
+        stopBitsSelect.disabled = disabled;
+        paritySelect.disabled = disabled;
+        flowControlSelect.disabled = disabled;
+    }
+
+    // ANSI 颜色代码映射
+    const ansiColors = {
+        '30': '#858585', // 黑色
+        '31': '#f14c4c', // 红色
+        '32': '#4ec94e', // 绿色
+        '33': '#cca700', // 黄色
+        '34': '#569cd6', // 蓝色
+        '35': '#c586c0', // 紫红色
+        '36': '#4ec9b0', // 青色
+        '37': '#cccccc', // 白色
+        '90': '#6a9955', // 亮黑色
+        '91': '#f14c4c', // 亮红色
+        '92': '#4ec94e', // 亮绿色
+        '93': '#cca700', // 亮黄色
+        '94': '#569cd6', // 亮蓝色
+        '95': '#c586c0', // 亮紫红色
+        '96': '#4ec9b0', // 亮青色
+        '97': '#ffffff', // 亮白色
+    };
+
+    // 解析 ANSI 转义码并返回 HTML
+    function parseAnsi(text) {
+        let result = '';
+        let currentColor = '#cccccc';
+        let i = 0;
+        let buffer = '';
+
+        while (i < text.length) {
+            // 检查是否是 ANSI 转义序列
+            if (text[i] === '\x1b' || text[i] === '\033') {
+                // 先把缓冲区内容输出
+                if (buffer) {
+                    result += `<span style="color:${currentColor}">${buffer}</span>`;
+                    buffer = '';
+                }
+
+                // 检查是否是 [ 开头
+                if (text[i + 1] === '[') {
+                    i += 2;
+                    // 收集数字
+                    let codes = '';
+                    while (i < text.length && (text[i] >= '0' && text[i] <= '9' || text[i] === ';')) {
+                        codes += text[i];
+                        i++;
+                    }
+
+                    // 处理代码
+                    const codeList = codes.split(';').filter(c => c !== '');
+                    for (const code of codeList) {
+                        if (code === '0' || code === '') {
+                            currentColor = '#cccccc';
+                        } else if (ansiColors[code]) {
+                            currentColor = ansiColors[code];
+                        } else if (code === '1') {
+                            // 粗体，继续保持颜色
+                        }
+                    }
+
+                    // 跳过最后一个字符（通常是 m）
+                    if (text[i] === 'm') i++;
+                } else {
+                    i++;
+                }
+            } else {
+                buffer += text[i];
+                i++;
+            }
+        }
+
+        // 输出剩余缓冲区
+        if (buffer) {
+            result += `<span style="color:${currentColor}">${buffer}</span>`;
+        }
+
+        return result;
+    }
+
+    // 添加数据到终端
+    function appendToTerminal(data, type = 'received') {
+        const timestamp = new Date().toLocaleTimeString('zh-CN', { hour12: false });
+        const div = document.createElement('div');
+        div.className = `data-${type}`;
+
+        // 解析 ANSI 颜色
+        let content = parseAnsi(data);
+
+        div.innerHTML = `<span class="timestamp">[${timestamp}]</span>${content}`;
+        terminalOutput.appendChild(div);
+        terminalOutput.scrollTop = terminalOutput.scrollHeight;
+    }
+
+    // HTML 转义
+    function escapeHtml(text) {
+        if (typeof text !== 'string') text = String(text);
+        return text.replace(/&/g, '&amp;')
+                   .replace(/</g, '&lt;')
+                   .replace(/>/g, '&gt;')
+                   .replace(/"/g, '&quot;')
+                   .replace(/ /g, '&nbsp;');
+    }
+
+    // 清空终端
+    function clearTerminal() {
+        terminalOutput.innerHTML = '';
+    }
+
+    // 发送数据
+    async function sendData() {
+        const data = serialInput.value;
+        if (!data || !isConnected) return;
+
+        try {
+            await window.electronAPI.serial.write(data);
+            appendToTerminal(data, 'sent');
+            serialInput.value = '';
+        } catch (error) {
+            console.error('Failed to send data:', error);
+        }
+    }
+
+    // 监听串口数据
+    window.electronAPI.serial.onData((data) => {
+        appendToTerminal(data, 'received');
+    });
+
+    // 监听串口状态
+    window.electronAPI.serial.onStatus((status) => {
+        console.log('Serial status:', status);
+        if (status.type === 'disconnected') {
+            isConnected = false;
+            updateConnectButton();
+            setConfigDisabled(false);
+            appendToTerminal('Port disconnected', 'system');
+        } else if (status.type === 'error') {
+            appendToTerminal(`Error: ${status.message}`, 'system');
+        }
+    });
+
+    // 绑定事件
+    if (refreshPortsBtn) {
+        refreshPortsBtn.addEventListener('click', refreshPorts);
+    }
+
+    if (portSelect) {
+        portSelect.addEventListener('change', updateConnectButton);
+    }
+
+    if (connectBtn) {
+        connectBtn.addEventListener('click', toggleConnection);
+    }
+
+    if (sendBtn) {
+        sendBtn.addEventListener('click', sendData);
+    }
+
+    if (serialInput) {
+        serialInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendData();
+            }
+        });
+    }
+
+    if (clearTerminalBtn) {
+        clearTerminalBtn.addEventListener('click', clearTerminal);
+    }
+
+    // 初始加载串口列表
+    refreshPorts();
+
+    // 初始化波特率切换
+    initBaudRateToggle();
 });
