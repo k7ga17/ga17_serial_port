@@ -4,61 +4,65 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebar = document.getElementById('sidebar');
     const auxBar = document.getElementById('auxBar');
     const panel = document.getElementById('panel');
-    const contentArea = document.getElementById('contentArea');
     const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
     const togglePanelBtn = document.getElementById('togglePanelBtn');
     const toggleAuxBarBtn = document.getElementById('toggleAuxBarBtn');
+    const activityIcons = document.querySelectorAll('.activity-icon');
 
-    // 侧边栏默认宽度
-    const DEFAULT_SIDEBAR_WIDTH = 250;
-    const DEFAULT_AUXBAR_WIDTH = 250;
+    // ============ 活动栏交互 ============
+    activityIcons.forEach(icon => {
+        icon.addEventListener('click', () => {
+            // 切换活动图标激活状态
+            activityIcons.forEach(i => i.classList.remove('active'));
+            icon.classList.add('active');
+        });
+    });
 
-    // ============ 布局控制 ============
-    function togglePanel(panelElement, btnElement, contentAreaClass, defaultSize) {
-        if (panelElement.classList.contains('hidden')) {
-            panelElement.classList.remove('hidden');
-            btnElement.classList.add('active');
-            contentArea.classList.remove(contentAreaClass);
-            // 恢复宽度
-            if (panelElement === sidebar || panelElement === auxBar) {
-                panelElement.style.width = defaultSize + 'px';
+    // ============ 布局控制按钮 ============
+    // 确保元素存在后再绑定事件
+    if (toggleSidebarBtn) {
+        toggleSidebarBtn.addEventListener('click', () => {
+            if (sidebar) {
+                sidebar.classList.toggle('visible');
+                toggleSidebarBtn.classList.toggle('active');
             }
-        } else {
-            // 保存当前宽度
-            if (panelElement === sidebar || panelElement === auxBar) {
-                panelElement.dataset.prevWidth = panelElement.offsetWidth || defaultSize;
-            }
-            panelElement.classList.add('hidden');
-            btnElement.classList.remove('active');
-            contentArea.classList.add(contentAreaClass);
-        }
+        });
     }
 
-    toggleSidebarBtn.addEventListener('click', () => {
-        togglePanel(sidebar, toggleSidebarBtn, 'sidebar-hidden', DEFAULT_SIDEBAR_WIDTH);
-    });
+    if (togglePanelBtn) {
+        togglePanelBtn.addEventListener('click', () => {
+            if (panel) {
+                panel.classList.toggle('visible');
+                togglePanelBtn.classList.toggle('active');
+            }
+        });
+    }
 
-    togglePanelBtn.addEventListener('click', () => {
-        togglePanel(panel, togglePanelBtn, 'panel-hidden', null);
-    });
+    if (toggleAuxBarBtn) {
+        toggleAuxBarBtn.addEventListener('click', () => {
+            if (auxBar) {
+                auxBar.classList.toggle('visible');
+                toggleAuxBarBtn.classList.toggle('active');
+            }
+        });
+    }
 
-    toggleAuxBarBtn.addEventListener('click', () => {
-        togglePanel(auxBar, toggleAuxBarBtn, 'auxbar-hidden', DEFAULT_AUXBAR_WIDTH);
-    });
-
-    // ============ 键盘快捷键 ============
+    // ============ 键盘快捷键（支持 Ctrl 和 Cmd） ============
     document.addEventListener('keydown', (e) => {
-        if (e.ctrlKey && e.key === 'b') {
+        // Ctrl/Cmd + B - 切换左侧边栏
+        if ((e.ctrlKey || e.metaKey) && e.key === 'b' && !e.altKey) {
             e.preventDefault();
-            toggleSidebarBtn.click();
+            if (toggleSidebarBtn) toggleSidebarBtn.click();
         }
-        if (e.ctrlKey && e.key === 'j') {
+        // Ctrl/Cmd + J - 切换底部面板
+        if ((e.ctrlKey || e.metaKey) && e.key === 'j') {
             e.preventDefault();
-            togglePanelBtn.click();
+            if (togglePanelBtn) togglePanelBtn.click();
         }
-        if (e.ctrlKey && e.altKey && e.key === 'b') {
+        // Ctrl/Cmd + Alt + B - 切换右侧边栏
+        if ((e.ctrlKey || e.metaKey) && e.altKey && e.key === 'b') {
             e.preventDefault();
-            toggleAuxBarBtn.click();
+            if (toggleAuxBarBtn) toggleAuxBarBtn.click();
         }
     });
 
@@ -78,7 +82,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (maximizeBtn) {
         maximizeBtn.addEventListener('click', async () => {
             window.electronAPI.maximize();
-            // 等待一小段时间后更新图标状态
             setTimeout(updateMaximizeIcon, 100);
         });
     }
@@ -89,7 +92,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 更新最大化按钮图标
     function updateMaximizeIcon() {
         window.electronAPI.isMaximized().then((isMax) => {
             if (isMax) {
@@ -104,10 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 初始化图标状态
     updateMaximizeIcon();
-
-    // 监听窗口状态变化（窗口大小改变时）
     window.addEventListener('resize', updateMaximizeIcon);
 
     // ============ 标题栏拖动 ============
