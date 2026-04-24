@@ -165,7 +165,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // ============ 串口配置功能 ============
     const portSelect = document.getElementById('serial-port');
     const baudRateSelect = document.getElementById('baud-rate-select');
-    const baudRateInput = document.getElementById('baud-rate-input');
     const dataBitsSelect = document.getElementById('data-bits');
     const stopBitsSelect = document.getElementById('stop-bits');
     const paritySelect = document.getElementById('parity');
@@ -181,40 +180,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let isConnected = false;
 
-    // 波特率切换逻辑
-    function initBaudRateToggle() {
-        baudRateSelect.addEventListener('change', () => {
-            if (baudRateSelect.value === 'custom') {
-                baudRateSelect.style.display = 'none';
-                baudRateInput.style.display = 'block';
-                baudRateInput.focus();
-                baudRateInput.value = '';
-            }
-        });
-
-        baudRateInput.addEventListener('blur', () => {
-            if (baudRateInput.value === '') {
-                baudRateSelect.style.display = 'block';
-                baudRateInput.style.display = 'none';
-                baudRateSelect.value = '115200';
-            }
-        });
-
-        baudRateInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                if (baudRateInput.value !== '') {
-                    baudRateSelect.style.display = 'block';
-                    baudRateInput.style.display = 'none';
-                }
-            }
-        });
-    }
-
     // 获取当前波特率值
     function getBaudRate() {
-        if (baudRateSelect.value === 'custom') {
-            return baudRateInput.value || '115200';
-        }
         return baudRateSelect.value;
     }
 
@@ -237,21 +204,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 更新连接按钮状态
     function updateConnectButton() {
+        const connectIcon = document.getElementById('connect-icon');
+        const connectText = document.getElementById('connect-text');
+
         if (isConnected) {
-            connectBtn.innerHTML = `
-                <svg viewBox="0 0 16 16" width="14" height="14">
-                    <path fill="currentColor" d="M4.5 2A1.5 1.5 0 0 0 3 3.5v9A1.5 1.5 0 0 0 4.5 14h7a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 11.5 2h-7zM4 3.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5v-9z"/>
-                    <path fill="currentColor" d="M6 8h4v2H6z"/>
-                </svg>
-                Disconnect`;
+            connectIcon.src = './assets/func_serial_port/icon_port_connect.svg';
+            connectText.textContent = 'Disconnect';
             connectBtn.classList.add('connected');
             connectBtn.disabled = false;
         } else {
-            connectBtn.innerHTML = `
-                <svg viewBox="0 0 16 16" width="14" height="14">
-                    <path fill="currentColor" d="M4 3.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5v-9zm.5 1v7h6V4.5h-6z"/>
-                </svg>
-                Connect`;
+            connectIcon.src = './assets/func_serial_port/icon_port_disconnect.svg';
+            connectText.textContent = 'Connect';
             connectBtn.classList.remove('connected');
             connectBtn.disabled = !portSelect.value;
         }
@@ -304,7 +267,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // 设置配置选项禁用状态
     function setConfigDisabled(disabled) {
         baudRateSelect.disabled = disabled;
-        baudRateInput.disabled = disabled;
         dataBitsSelect.disabled = disabled;
         stopBitsSelect.disabled = disabled;
         paritySelect.disabled = disabled;
@@ -406,10 +368,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function escapeHtml(text) {
         if (typeof text !== 'string') text = String(text);
         return text.replace(/&/g, '&amp;')
-                   .replace(/</g, '&lt;')
-                   .replace(/>/g, '&gt;')
-                   .replace(/"/g, '&quot;')
-                   .replace(/ /g, '&nbsp;');
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/ /g, '&nbsp;');
     }
 
     // 清空终端
@@ -480,7 +442,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 初始加载串口列表
     refreshPorts();
-
-    // 初始化波特率切换
-    initBaudRateToggle();
 });

@@ -27,7 +27,7 @@ function createWindow() {
     mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
 
     // 开发者工具
-    mainWindow.webContents.openDevTools();
+    // mainWindow.webContents.openDevTools();
 
     // 窗口关闭时，将 mainWindow 置为 null，释放内存
     mainWindow.on('closed', () => {

@@ -513,28 +513,6 @@ body {
     flex: 1;
 }
 
-#baud-rate-input {
-    flex: 1;
-    height: 100px;
-    padding: 0 8px;
-    background: #3c3c3c;
-    border: 0;
-    border-radius: 3px;
-    color: #cccccc;
-    font-size: 13px;
-    cursor: text;
-    outline: none;
-    transition: border-color 0.1s;
-    -moz-appearance: textfield;
-    appearance: textfield;
-}
-
-#baud-rate-input::-webkit-inner-spin-button,
-#baud-rate-input::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
 .config-btn {
     width: 26px;
     height: 26px;
