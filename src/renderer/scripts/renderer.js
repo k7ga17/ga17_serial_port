@@ -1,22 +1,65 @@
 // 渲染进程脚本
 document.addEventListener('DOMContentLoaded', () => {
-    // ============ 布局控制按钮 ============
-    const layoutButtons = document.querySelectorAll('.layoutBtn');
+    // ============ 面板元素 ============
+    const sidebar = document.getElementById('sidebar');
+    const auxBar = document.getElementById('auxBar');
+    const panel = document.getElementById('panel');
+    const contentArea = document.getElementById('contentArea');
+    const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
+    const togglePanelBtn = document.getElementById('togglePanelBtn');
+    const toggleAuxBarBtn = document.getElementById('toggleAuxBarBtn');
 
-    layoutButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            // 单例切换：点击当前已激活的按钮则取消激活
-            if (btn.classList.contains('active')) {
-                btn.classList.remove('active');
-            } else {
-                // 取消其他按钮的激活状态
-                layoutButtons.forEach(b => b.classList.remove('active'));
-                // 激活当前按钮
-                btn.classList.add('active');
+    // 侧边栏默认宽度
+    const DEFAULT_SIDEBAR_WIDTH = 250;
+    const DEFAULT_AUXBAR_WIDTH = 250;
+
+    // ============ 布局控制 ============
+    function togglePanel(panelElement, btnElement, contentAreaClass, defaultSize) {
+        if (panelElement.classList.contains('hidden')) {
+            panelElement.classList.remove('hidden');
+            btnElement.classList.add('active');
+            contentArea.classList.remove(contentAreaClass);
+            // 恢复宽度
+            if (panelElement === sidebar || panelElement === auxBar) {
+                panelElement.style.width = defaultSize + 'px';
             }
-            // 发送按钮点击事件到主进程
-            window.electronAPI.sendLayoutToggle(btn.id);
-        });
+        } else {
+            // 保存当前宽度
+            if (panelElement === sidebar || panelElement === auxBar) {
+                panelElement.dataset.prevWidth = panelElement.offsetWidth || defaultSize;
+            }
+            panelElement.classList.add('hidden');
+            btnElement.classList.remove('active');
+            contentArea.classList.add(contentAreaClass);
+        }
+    }
+
+    toggleSidebarBtn.addEventListener('click', () => {
+        togglePanel(sidebar, toggleSidebarBtn, 'sidebar-hidden', DEFAULT_SIDEBAR_WIDTH);
+    });
+
+    togglePanelBtn.addEventListener('click', () => {
+        togglePanel(panel, togglePanelBtn, 'panel-hidden', null);
+    });
+
+    toggleAuxBarBtn.addEventListener('click', () => {
+        togglePanel(auxBar, toggleAuxBarBtn, 'auxbar-hidden', DEFAULT_AUXBAR_WIDTH);
+    });
+
+    // ============ 键盘快捷键 ============
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.key === 'b') {
+            e.preventDefault();
+            toggleSidebarBtn.click();
+        }
+        if (e.ctrlKey && e.key === 'j') {
+            e.preventDefault();
+            togglePanelBtn.click();
+        }
+        if (e.ctrlKey && e.altKey && e.key === 'b') {
+            e.preventDefault();
+            toggleAuxBarBtn.click();
+        }
     });
 
     // ============ 窗口控制 ============
