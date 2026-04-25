@@ -19,12 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 如果点击的是当前激活的视图，则切换侧边栏显示/隐藏
             if (currentView === viewName && isSidebarVisible) {
-                sidebar.classList.remove('visible');
-                isSidebarVisible = false;
-                // 收起时移除选中效果
-                activityIcons.forEach(i => i.classList.remove('active'));
-                // 同步按钮状态
-                syncButtonState(toggleSidebarBtn, sidebar, false);
+                hideSidebar();
                 return;
             }
 
@@ -42,11 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // 显示侧边栏
-            sidebar.classList.add('visible');
-            isSidebarVisible = true;
+            showSidebar();
             currentView = viewName;
-            // 同步按钮状态
-            syncButtonState(toggleSidebarBtn, sidebar, true);
         });
     });
 
@@ -58,23 +50,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             btn.classList.remove('active');
         }
-    }
-
-    // 确保元素存在后再绑定事件
-    if (toggleSidebarBtn) {
-        toggleSidebarBtn.addEventListener('click', () => {
-            if (sidebar) {
-                const wasVisible = sidebar.classList.contains('visible');
-                sidebar.classList.toggle('visible');
-                syncButtonState(toggleSidebarBtn, sidebar, sidebar.classList.contains('visible'));
-                // 如果是显示侧边栏，设置保存的宽度
-                if (!wasVisible) {
-                    setTimeout(() => {
-                        sidebar.style.width = sidebarSavedWidth + 'px';
-                    }, 50);
-                }
-            }
-        });
     }
 
     if (togglePanelBtn) {
@@ -227,19 +202,53 @@ document.addEventListener('DOMContentLoaded', () => {
     let sidebarStartX = 0;
     let sidebarStartWidth = 0;
     let sidebarSavedWidth = 250; // 保存用户调整后的宽度
-    const sidebarMinWidth = 150; // 最小宽度
-    const sidebarMaxWidth = 500; // 最大宽度
+    const sidebarDefaultWidth = 250; // 默认宽度
+    const sidebarMinThreshold = 80; // 触发隐藏的阈值
+    let sidebarWasAutoHidden = false; // 是否因拖动过窄而自动隐藏
+
+    function hideSidebar(isAuto = false) {
+        sidebar.classList.remove('visible');
+        sidebar.style.width = '';
+        if (toggleSidebarBtn) {
+            toggleSidebarBtn.classList.remove('active');
+        }
+        if (isAuto) {
+            sidebarWasAutoHidden = true;
+            sidebarSavedWidth = sidebarDefaultWidth;
+        } else {
+            sidebarWasAutoHidden = false;
+        }
+        // 取消活动栏选中状态
+        activityIcons.forEach(i => i.classList.remove('active'));
+        isSidebarVisible = false;
+    }
+
+    function showSidebar() {
+        sidebar.classList.add('visible');
+        sidebar.style.width = sidebarSavedWidth + 'px';
+        if (toggleSidebarBtn) {
+            toggleSidebarBtn.classList.add('active');
+        }
+        // 激活对应的活动栏图标
+        activityIcons.forEach(i => {
+            if (i.dataset.view === currentView) {
+                i.classList.add('active');
+            }
+        });
+        isSidebarVisible = true;
+    }
 
     if (sidebar) {
-        sidebar.addEventListener('mousedown', (e) => {
-            // 只在 ::after 伪元素区域响应（右边距6px范围内）
-            if (e.target !== sidebar) return;
-            const rect = sidebar.getBoundingClientRect();
-            if (e.clientX < rect.right - 6) return;
+        let sidebarIsLocked = false;
+        let sidebarLockTimer = null;
+        let sidebarLockStartX = 0;
 
+        sidebar.addEventListener('mousedown', (e) => {
             if (!sidebar.classList.contains('visible')) return;
+            const rect = sidebar.getBoundingClientRect();
+            const edgeThreshold = 8;
+            if (rect.right - e.clientX > edgeThreshold) return;
             isSidebarResizing = true;
-            sidebar.classList.add('resizing');
             sidebarStartX = e.clientX;
             sidebarStartWidth = sidebar.offsetWidth;
             document.body.style.cursor = 'col-resize';
@@ -247,20 +256,90 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         document.addEventListener('mousemove', (e) => {
-            if (!isSidebarResizing) return;
+            if (!isSidebarResizing) {
+                if (sidebar.classList.contains('visible')) {
+                    const rect = sidebar.getBoundingClientRect();
+                    if (rect.right - e.clientX <= 8 && rect.right - e.clientX >= 0) {
+                        sidebar.style.cursor = 'col-resize';
+                    } else {
+                        sidebar.style.cursor = '';
+                    }
+                }
+                return;
+            }
+
+            if (sidebarIsLocked) {
+                if (e.clientX > sidebarLockStartX) {
+                    sidebarIsLocked = false;
+                    sidebarLockStartX = 0;
+                    if (sidebarLockTimer) {
+                        clearTimeout(sidebarLockTimer);
+                        sidebarLockTimer = null;
+                    }
+                    sidebarStartX = e.clientX;
+                    sidebarStartWidth = sidebar.offsetWidth;
+                }
+                return;
+            }
+
             const deltaX = e.clientX - sidebarStartX;
             let newWidth = sidebarStartWidth + deltaX;
-            newWidth = Math.max(sidebarMinWidth, Math.min(newWidth, sidebarMaxWidth));
+            newWidth = Math.max(0, Math.min(newWidth, 500));
             sidebar.style.width = newWidth + 'px';
+
+            if (newWidth < sidebarMinThreshold) {
+                sidebarIsLocked = true;
+                sidebarLockStartX = e.clientX;
+                sidebar.style.width = sidebarMinThreshold + 'px';
+
+                sidebarLockTimer = setTimeout(() => {
+                    if (sidebarIsLocked) {
+                        hideSidebar(true);
+                        isSidebarResizing = false;
+                        document.body.style.cursor = '';
+                        document.body.style.userSelect = '';
+                        sidebarIsLocked = false;
+                        sidebarLockStartX = 0;
+                        sidebarLockTimer = null;
+                    }
+                }, 500);
+            }
         });
 
         document.addEventListener('mouseup', () => {
             if (isSidebarResizing) {
                 isSidebarResizing = false;
-                sidebar.classList.remove('resizing');
                 document.body.style.cursor = '';
                 document.body.style.userSelect = '';
-                sidebarSavedWidth = sidebar.offsetWidth;
+
+                if (sidebarIsLocked) {
+                    sidebarIsLocked = false;
+                    sidebarLockStartX = 0;
+                    if (sidebarLockTimer) {
+                        clearTimeout(sidebarLockTimer);
+                        sidebarLockTimer = null;
+                    }
+                }
+
+                const currentWidth = sidebar.offsetWidth;
+                if (currentWidth >= sidebarMinThreshold) {
+                    sidebarSavedWidth = currentWidth;
+                    sidebarWasAutoHidden = false;
+                }
+            }
+        });
+    }
+
+    // 同步侧边栏按钮与显示状态
+    if (toggleSidebarBtn) {
+        toggleSidebarBtn.addEventListener('click', () => {
+            if (sidebar) {
+                const wasVisible = sidebar.classList.contains('visible');
+                if (wasVisible) {
+                    hideSidebar();
+                } else {
+                    showSidebar();
+                }
             }
         });
     }

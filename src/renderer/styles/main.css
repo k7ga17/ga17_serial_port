@@ -265,23 +265,6 @@ body {
 }
 
 /* 左侧边栏拖动条 */
-#sidebar.visible::after {
-    content: '';
-    position: absolute;
-    right: 0;
-    top: 0;
-    width: 6px;
-    height: 100%;
-    background: #333333;
-    cursor: col-resize;
-    z-index: 10;
-}
-
-#sidebar.visible::after:hover,
-#sidebar.visible.resizing::after {
-    background: #007acc;
-}
-
 /* 中间区域（编辑区 + 底部面板） */
 #centerContent {
     flex: 1;
