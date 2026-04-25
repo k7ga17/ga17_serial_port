@@ -305,6 +305,25 @@ body {
     border-top-color: #3c3c3c;
 }
 
+/* 拖动调整条 */
+.panel-resizer {
+    height: 4px;
+    background: transparent;
+    flex-shrink: 0;
+    cursor: row-resize;
+    position: relative;
+    z-index: 10;
+}
+
+.panel-resizer:hover,
+.panel-resizer.resizing {
+    background: #007acc;
+}
+
+.panel-resizer.hidden {
+    display: none;
+}
+
 /* 面板通用样式 */
 .panel-header {
     height: 22px;

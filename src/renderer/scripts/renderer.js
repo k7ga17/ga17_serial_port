@@ -73,11 +73,98 @@ document.addEventListener('DOMContentLoaded', () => {
     if (togglePanelBtn) {
         togglePanelBtn.addEventListener('click', () => {
             if (panel) {
-                panel.classList.toggle('visible');
-                syncButtonState(togglePanelBtn, panel, panel.classList.contains('visible'));
+                if (panel.classList.contains('visible')) {
+                    hidePanel();
+                } else {
+                    showPanel();
+                }
             }
         });
     }
+
+    // ============ 底部面板拖动调整 ============
+    const panelResizer = document.getElementById('panelResizer');
+    let isResizing = false;
+    let startY = 0;
+    let startHeight = 0;
+    let savedHeight = 200; // 保存用户调整后的高度
+    const defaultHeight = 200; // 默认高度
+    const minThreshold = 80; // 触发隐藏的阈值
+    let wasAutoHidden = false; // 是否因拖动过低而自动隐藏
+
+    function updateResizerVisibility() {
+        if (panelResizer) {
+            if (panel.classList.contains('visible')) {
+                panelResizer.classList.remove('hidden');
+            } else {
+                panelResizer.classList.add('hidden');
+            }
+        }
+    }
+
+    function hidePanel(isAuto = false) {
+        panel.classList.remove('visible');
+        panel.style.height = '';
+        panelResizer.classList.add('hidden');
+        if (togglePanelBtn) {
+            togglePanelBtn.classList.remove('active');
+        }
+        if (isAuto) {
+            wasAutoHidden = true;
+            savedHeight = defaultHeight;
+        } else {
+            wasAutoHidden = false;
+        }
+    }
+
+    function showPanel() {
+        panel.classList.add('visible');
+        panel.style.height = savedHeight + 'px';
+        panelResizer.classList.remove('hidden');
+        if (togglePanelBtn) {
+            togglePanelBtn.classList.add('active');
+        }
+    }
+
+    if (panelResizer) {
+        panelResizer.addEventListener('mousedown', (e) => {
+            if (!panel.classList.contains('visible')) return;
+            isResizing = true;
+            panelResizer.classList.add('resizing');
+            startY = e.clientY;
+            startHeight = panel.offsetHeight;
+            document.body.style.cursor = 'row-resize';
+            document.body.style.userSelect = 'none';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isResizing) return;
+            const deltaY = startY - e.clientY;
+            const newHeight = Math.max(0, Math.min(startHeight + deltaY, window.innerHeight - 100));
+            panel.style.height = newHeight + 'px';
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isResizing) {
+                isResizing = false;
+                panelResizer.classList.remove('resizing');
+                document.body.style.cursor = '';
+                document.body.style.userSelect = '';
+
+                const currentHeight = panel.offsetHeight;
+                // 如果高度低于阈值，自动隐藏面板
+                if (currentHeight < minThreshold) {
+                    hidePanel(true);
+                } else {
+                    savedHeight = currentHeight;
+                    wasAutoHidden = false;
+                }
+            }
+        });
+    }
+
+    // 初始化调整条可见性
+    updateResizerVisibility();
 
     if (toggleAuxBarBtn) {
         toggleAuxBarBtn.addEventListener('click', () => {
