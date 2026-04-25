@@ -136,9 +136,8 @@ ipcMain.handle('serial-open', async (event, options) => {
                 // 监听数据接收
                 serialPort.on('data', (data) => {
                     if (mainWindow && !mainWindow.isDestroyed()) {
-                        // 将数据转换为 UTF-8 字符串
-                        const decoded = iconv.decode(data, 'utf-8');
-                        mainWindow.webContents.send('serial-data', decoded);
+                        // 发送原始 Buffer 数据（ArrayBuffer）给前端处理
+                        mainWindow.webContents.send('serial-data', data.toString('binary'));
                     }
                 });
 

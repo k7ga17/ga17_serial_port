@@ -395,7 +395,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 监听串口数据
     window.electronAPI.serial.onData((data) => {
-        appendToTerminal(data, 'received');
+        // 获取 HEX 显示模式
+        const hexToggle = document.getElementById('hex-display-toggle');
+        const isHexMode = hexToggle && hexToggle.checked;
+
+        if (isHexMode) {
+            // 16进制模式：将字符串转换为 16 进制显示
+            const bytes = [];
+            for (let i = 0; i < data.length; i++) {
+                bytes.push(data.charCodeAt(i).toString(16).toUpperCase().padStart(2, '0'));
+            }
+            appendToTerminal(bytes.join(' '), 'received');
+        } else {
+            // 文本模式：直接显示
+            appendToTerminal(data, 'received');
+        }
     });
 
     // 监听串口状态
