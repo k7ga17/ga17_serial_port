@@ -91,6 +91,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const defaultHeight = 200; // 默认高度
     const minThreshold = 80; // 触发隐藏的阈值
     let wasAutoHidden = false; // 是否因拖动过低而自动隐藏
+    let isLocked = false; // 是否被锁定
+    let lockTimer = null; // 锁定计时器
+    let lockStartY = 0; // 锁定时的鼠标Y位置
 
     function updateResizerVisibility() {
         if (panelResizer) {
@@ -106,6 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
         panel.classList.remove('visible');
         panel.style.height = '';
         panelResizer.classList.add('hidden');
+        panelResizer.classList.remove('resizing');
         if (togglePanelBtn) {
             togglePanelBtn.classList.remove('active');
         }
@@ -139,9 +143,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.addEventListener('mousemove', (e) => {
             if (!isResizing) return;
+
+            // 如果被锁定，只能向上移动解锁
+            if (isLocked) {
+                if (e.clientY < lockStartY) {
+                    // 向上移动超过一定距离，解除锁定
+                    isLocked = false;
+                    lockStartY = 0;
+                    if (lockTimer) {
+                        clearTimeout(lockTimer);
+                        lockTimer = null;
+                    }
+                    startY = e.clientY;
+                    startHeight = panel.offsetHeight;
+                }
+                return;
+            }
+
             const deltaY = startY - e.clientY;
-            const newHeight = Math.max(0, Math.min(startHeight + deltaY, window.innerHeight - 100));
+            let newHeight = startHeight + deltaY;
+            newHeight = Math.max(0, Math.min(newHeight, window.innerHeight - 100));
             panel.style.height = newHeight + 'px';
+
+            // 到达阈值时锁定
+            if (newHeight < minThreshold) {
+                isLocked = true;
+                lockStartY = e.clientY;
+                panel.style.height = minThreshold + 'px';
+
+                // 2秒后自动隐藏
+                lockTimer = setTimeout(() => {
+                    if (isLocked) {
+                        hidePanel(true);
+                        isResizing = false;
+                        document.body.style.cursor = '';
+                        document.body.style.userSelect = '';
+                        isLocked = false;
+                        lockStartY = 0;
+                        lockTimer = null;
+                    }
+                }, 500);
+            }
         });
 
         document.addEventListener('mouseup', () => {
@@ -151,11 +193,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.body.style.cursor = '';
                 document.body.style.userSelect = '';
 
+                // 取消锁定状态
+                if (isLocked) {
+                    isLocked = false;
+                    lockStartY = 0;
+                    if (lockTimer) {
+                        clearTimeout(lockTimer);
+                        lockTimer = null;
+                    }
+                }
+
                 const currentHeight = panel.offsetHeight;
-                // 如果高度低于阈值，自动隐藏面板
-                if (currentHeight < minThreshold) {
-                    hidePanel(true);
-                } else {
+                if (currentHeight >= minThreshold) {
                     savedHeight = currentHeight;
                     wasAutoHidden = false;
                 }
