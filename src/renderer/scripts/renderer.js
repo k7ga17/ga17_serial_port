@@ -64,8 +64,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (toggleSidebarBtn) {
         toggleSidebarBtn.addEventListener('click', () => {
             if (sidebar) {
+                const wasVisible = sidebar.classList.contains('visible');
                 sidebar.classList.toggle('visible');
                 syncButtonState(toggleSidebarBtn, sidebar, sidebar.classList.contains('visible'));
+                // 如果是显示侧边栏，设置保存的宽度
+                if (!wasVisible) {
+                    setTimeout(() => {
+                        sidebar.style.width = sidebarSavedWidth + 'px';
+                    }, 50);
+                }
             }
         });
     }
@@ -214,6 +221,49 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 初始化调整条可见性
     updateResizerVisibility();
+
+    // ============ 左侧边栏拖动调整 ============
+    let isSidebarResizing = false;
+    let sidebarStartX = 0;
+    let sidebarStartWidth = 0;
+    let sidebarSavedWidth = 250; // 保存用户调整后的宽度
+    const sidebarMinWidth = 150; // 最小宽度
+    const sidebarMaxWidth = 500; // 最大宽度
+
+    if (sidebar) {
+        sidebar.addEventListener('mousedown', (e) => {
+            // 只在 ::after 伪元素区域响应（右边距6px范围内）
+            if (e.target !== sidebar) return;
+            const rect = sidebar.getBoundingClientRect();
+            if (e.clientX < rect.right - 6) return;
+
+            if (!sidebar.classList.contains('visible')) return;
+            isSidebarResizing = true;
+            sidebar.classList.add('resizing');
+            sidebarStartX = e.clientX;
+            sidebarStartWidth = sidebar.offsetWidth;
+            document.body.style.cursor = 'col-resize';
+            document.body.style.userSelect = 'none';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isSidebarResizing) return;
+            const deltaX = e.clientX - sidebarStartX;
+            let newWidth = sidebarStartWidth + deltaX;
+            newWidth = Math.max(sidebarMinWidth, Math.min(newWidth, sidebarMaxWidth));
+            sidebar.style.width = newWidth + 'px';
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isSidebarResizing) {
+                isSidebarResizing = false;
+                sidebar.classList.remove('resizing');
+                document.body.style.cursor = '';
+                document.body.style.userSelect = '';
+                sidebarSavedWidth = sidebar.offsetWidth;
+            }
+        });
+    }
 
     if (toggleAuxBarBtn) {
         toggleAuxBarBtn.addEventListener('click', () => {

@@ -236,34 +236,59 @@ body {
 
 /* ============ 工作区 ============ */
 #workspace {
-    flex: 1;
-    display: grid;
-    grid-template-columns: auto 1fr auto;
+    flex: 1 1 auto;
+    display: flex;
     overflow: hidden;
+    align-items: stretch;
+    min-height: 100px;
+    min-width: 0;
 }
 
 /* 左侧边栏 */
 #sidebar {
     background: #252526;
-    border-right: 1px solid transparent;
+    border-right: 1px solid #3c3c3c;
     overflow: hidden;
-    transition: width 0.15s ease, border-color 0.15s ease;
     width: 0;
     min-width: 0;
+    flex-shrink: 0;
+    flex-grow: 0;
+    position: relative;
 }
 
 #sidebar.visible {
     width: 250px;
-    min-width: 250px;
-    border-right-color: #3c3c3c;
+    min-width: 150px;
+    max-width: 500px;
+    flex-shrink: 0;
+    flex-grow: 0;
+}
+
+/* 左侧边栏拖动条 */
+#sidebar.visible::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 6px;
+    height: 100%;
+    background: #333333;
+    cursor: col-resize;
+    z-index: 10;
+}
+
+#sidebar.visible::after:hover,
+#sidebar.visible.resizing::after {
+    background: #007acc;
 }
 
 /* 中间区域（编辑区 + 底部面板） */
 #centerContent {
+    flex: 1;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    min-width: 0;
+    min-width: 200px;
 }
 
 /* 主编辑区 */
@@ -277,17 +302,17 @@ body {
 /* 右侧边栏 */
 #auxBar {
     background: #252526;
-    border-left: 1px solid transparent;
+    border-left: 1px solid #3c3c3c;
     overflow: hidden;
-    transition: width 0.15s ease, border-color 0.15s ease;
     width: 0;
     min-width: 0;
+    flex-shrink: 0;
 }
 
 #auxBar.visible {
     width: 250px;
-    min-width: 250px;
-    border-left-color: #3c3c3c;
+    min-width: 150px;
+    max-width: 500px;
 }
 
 /* ============ 底部面板 ============ */
