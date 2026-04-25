@@ -136,8 +136,8 @@ ipcMain.handle('serial-open', async (event, options) => {
                 // 监听数据接收
                 serialPort.on('data', (data) => {
                     if (mainWindow && !mainWindow.isDestroyed()) {
-                        // 将 GBK 编码转换为 UTF-8
-                        const decoded = iconv.decode(data, 'gbk');
+                        // 将数据转换为 UTF-8 字符串
+                        const decoded = iconv.decode(data, 'utf-8');
                         mainWindow.webContents.send('serial-data', decoded);
                     }
                 });

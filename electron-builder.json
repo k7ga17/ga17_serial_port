@@ -15,6 +15,13 @@
   },
   "files": [
     "src/**/*",
-    "assets/**/*"
-  ]
+    "assets/**/*",
+    "node_modules/**/*"
+  ],
+  "asar": true,
+  "asarUnpack": [
+    "node_modules/@serialport/**/*",
+    "node_modules/iconv-lite/**/*"
+  ],
+  "npmRebuild": true
 }
