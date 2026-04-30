@@ -290,12 +290,32 @@ body {
     width: 0;
     min-width: 0;
     flex-shrink: 0;
+    position: relative;
 }
 
 #auxBar.visible {
     width: 250px;
     min-width: 150px;
     max-width: 500px;
+}
+
+/* 右侧边栏左边缘拖动区域指示 */
+#auxBar::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: transparent;
+    transition: background 0.15s;
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* 右侧边栏在拖动时显示蓝色条 */
+#auxBar.resizing::before {
+    background: #007acc;
 }
 
 /* ============ 底部面板 ============ */

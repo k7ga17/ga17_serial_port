@@ -344,11 +344,176 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // ============ 右侧边栏拖动调整 ============
+    let isAuxBarResizing = false;
+    let auxBarStartX = 0;
+    let auxBarStartWidth = 0;
+    let auxBarSavedWidth = 250; // 保存用户调整后的宽度
+    const auxBarDefaultWidth = 250; // 默认宽度
+    const auxBarMinThreshold = 80; // 触发隐藏的阈值
+    let auxBarWasAutoHidden = false; // 是否因拖动过窄而自动隐藏
+
+    function hideAuxBar(isAuto = false) {
+        auxBar.classList.remove('visible');
+        auxBar.style.width = '';
+        if (toggleAuxBarBtn) {
+            toggleAuxBarBtn.classList.remove('active');
+        }
+        if (isAuto) {
+            auxBarWasAutoHidden = true;
+            auxBarSavedWidth = auxBarDefaultWidth;
+        } else {
+            auxBarWasAutoHidden = false;
+        }
+        isAuxBarVisible = false;
+    }
+
+    function showAuxBar() {
+        auxBar.classList.add('visible');
+        auxBar.style.width = auxBarSavedWidth + 'px';
+        if (toggleAuxBarBtn) {
+            toggleAuxBarBtn.classList.add('active');
+        }
+        isAuxBarVisible = true;
+    }
+
+    let isAuxBarVisible = false;
+
+    if (auxBar) {
+        let auxBarIsLocked = false;
+        let auxBarLockTimer = null;
+        let auxBarLockStartX = 0;
+        let auxBarShowTimer = null; // 延时显示蓝色条的计时器
+
+        auxBar.addEventListener('mousedown', (e) => {
+            if (!auxBar.classList.contains('visible')) return;
+            const rect = auxBar.getBoundingClientRect();
+            const edgeThreshold = 8;
+            // 右侧边栏在左边界拖动，所以检测左侧边缘
+            if (e.clientX - rect.left > edgeThreshold) return;
+            isAuxBarResizing = true;
+            auxBar.classList.add('resizing');
+            auxBarStartX = e.clientX;
+            auxBarStartWidth = auxBar.offsetWidth;
+            document.body.style.cursor = 'col-resize';
+            document.body.style.userSelect = 'none';
+            // 清除延时计时器
+            if (auxBarShowTimer) {
+                clearTimeout(auxBarShowTimer);
+                auxBarShowTimer = null;
+            }
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isAuxBarResizing) {
+                if (auxBar.classList.contains('visible')) {
+                    const rect = auxBar.getBoundingClientRect();
+                    // 检测左边缘
+                    if (e.clientX - rect.left <= 8 && e.clientX - rect.left >= 0) {
+                        auxBar.style.cursor = 'col-resize';
+                        // 延时700ms后显示蓝色条
+                        if (!auxBarShowTimer) {
+                            auxBarShowTimer = setTimeout(() => {
+                                if (auxBar.classList.contains('visible')) {
+                                    const rect = auxBar.getBoundingClientRect();
+                                    if (e.clientX - rect.left <= 8 && e.clientX - rect.left >= 0) {
+                                        auxBar.classList.add('resizing');
+                                    }
+                                }
+                                auxBarShowTimer = null;
+                            }, 700);
+                        }
+                    } else {
+                        auxBar.style.cursor = '';
+                        auxBar.classList.remove('resizing');
+                        // 清除延时计时器
+                        if (auxBarShowTimer) {
+                            clearTimeout(auxBarShowTimer);
+                            auxBarShowTimer = null;
+                        }
+                    }
+                }
+                return;
+            }
+
+            if (auxBarIsLocked) {
+                if (e.clientX < auxBarLockStartX) {
+                    auxBarIsLocked = false;
+                    auxBarLockStartX = 0;
+                    if (auxBarLockTimer) {
+                        clearTimeout(auxBarLockTimer);
+                        auxBarLockTimer = null;
+                    }
+                    auxBarStartX = e.clientX;
+                    auxBarStartWidth = auxBar.offsetWidth;
+                }
+                return;
+            }
+
+            // 右侧边栏宽度随鼠标向右移动而减小，向左移动而增大
+            const deltaX = auxBarStartX - e.clientX;
+            let newWidth = auxBarStartWidth + deltaX;
+            newWidth = Math.max(0, Math.min(newWidth, 500));
+            auxBar.style.width = newWidth + 'px';
+
+            if (newWidth < auxBarMinThreshold) {
+                auxBarIsLocked = true;
+                auxBarLockStartX = e.clientX;
+                auxBar.style.width = auxBarMinThreshold + 'px';
+
+                auxBarLockTimer = setTimeout(() => {
+                    if (auxBarIsLocked) {
+                        hideAuxBar(true);
+                        isAuxBarResizing = false;
+                        document.body.style.cursor = '';
+                        document.body.style.userSelect = '';
+                        auxBarIsLocked = false;
+                        auxBarLockStartX = 0;
+                        auxBarLockTimer = null;
+                    }
+                }, 500);
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isAuxBarResizing) {
+                isAuxBarResizing = false;
+                auxBar.classList.remove('resizing');
+                document.body.style.cursor = '';
+                document.body.style.userSelect = '';
+
+                if (auxBarIsLocked) {
+                    auxBarIsLocked = false;
+                    auxBarLockStartX = 0;
+                    if (auxBarLockTimer) {
+                        clearTimeout(auxBarLockTimer);
+                        auxBarLockTimer = null;
+                    }
+                }
+
+                const currentWidth = auxBar.offsetWidth;
+                if (currentWidth >= auxBarMinThreshold) {
+                    auxBarSavedWidth = currentWidth;
+                    auxBarWasAutoHidden = false;
+                }
+            }
+            // 清除延时显示计时器
+            if (auxBarShowTimer) {
+                clearTimeout(auxBarShowTimer);
+                auxBarShowTimer = null;
+            }
+        });
+    }
+
     if (toggleAuxBarBtn) {
         toggleAuxBarBtn.addEventListener('click', () => {
             if (auxBar) {
-                auxBar.classList.toggle('visible');
-                syncButtonState(toggleAuxBarBtn, auxBar, auxBar.classList.contains('visible'));
+                const wasVisible = auxBar.classList.contains('visible');
+                if (wasVisible) {
+                    hideAuxBar();
+                } else {
+                    showAuxBar();
+                }
             }
         });
     }
