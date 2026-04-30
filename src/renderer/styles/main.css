@@ -342,14 +342,32 @@ body {
     background: #1e1e1e;
     border-top: 1px solid transparent;
     overflow: hidden;
-    transition: height 0.15s ease, border-color 0.15s ease;
     height: 0;
     flex-shrink: 0;
+    position: relative;
 }
 
 #panel.visible {
     height: 200px;
     border-top-color: #3c3c3c;
+}
+
+/* 底部面板上边缘拖动区域指示 */
+#panel::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: transparent;
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* 底部面板在拖动时显示蓝色条 */
+#panel.resizing::before {
+    background: #007acc;
 }
 
 /* 拖动调整条 */
@@ -362,13 +380,8 @@ body {
     z-index: 10;
 }
 
-.panel-resizer:hover,
-.panel-resizer.resizing {
-    background: #007acc;
-}
-
-.panel-resizer.hidden {
-    display: none;
+.panel-resizer:hover {
+    background: transparent;
 }
 
 /* 面板通用样式 */
