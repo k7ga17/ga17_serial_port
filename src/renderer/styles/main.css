@@ -264,6 +264,25 @@ body {
     flex-grow: 0;
 }
 
+/* 左侧边栏右边缘拖动区域指示 */
+#sidebar::before {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: transparent;
+    transition: background 0.15s;
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* 左侧边栏在拖动时显示蓝色条 */
+#sidebar.resizing::before {
+    background: #007acc;
+}
+
 /* 左侧边栏拖动条 */
 /* 中间区域（编辑区 + 底部面板） */
 #centerContent {

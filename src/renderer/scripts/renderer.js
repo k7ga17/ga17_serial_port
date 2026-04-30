@@ -242,6 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let sidebarIsLocked = false;
         let sidebarLockTimer = null;
         let sidebarLockStartX = 0;
+        let sidebarShowTimer = null; // 延时显示蓝色条的计时器
 
         sidebar.addEventListener('mousedown', (e) => {
             if (!sidebar.classList.contains('visible')) return;
@@ -249,10 +250,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const edgeThreshold = 8;
             if (rect.right - e.clientX > edgeThreshold) return;
             isSidebarResizing = true;
+            sidebar.classList.add('resizing');
             sidebarStartX = e.clientX;
             sidebarStartWidth = sidebar.offsetWidth;
             document.body.style.cursor = 'col-resize';
             document.body.style.userSelect = 'none';
+            // 清除延时计时器
+            if (sidebarShowTimer) {
+                clearTimeout(sidebarShowTimer);
+                sidebarShowTimer = null;
+            }
         });
 
         document.addEventListener('mousemove', (e) => {
@@ -261,8 +268,26 @@ document.addEventListener('DOMContentLoaded', () => {
                     const rect = sidebar.getBoundingClientRect();
                     if (rect.right - e.clientX <= 8 && rect.right - e.clientX >= 0) {
                         sidebar.style.cursor = 'col-resize';
+                        // 延时700ms后显示蓝色条
+                        if (!sidebarShowTimer) {
+                            sidebarShowTimer = setTimeout(() => {
+                                if (sidebar.classList.contains('visible')) {
+                                    const rect = sidebar.getBoundingClientRect();
+                                    if (rect.right - e.clientX <= 8 && rect.right - e.clientX >= 0) {
+                                        sidebar.classList.add('resizing');
+                                    }
+                                }
+                                sidebarShowTimer = null;
+                            }, 700);
+                        }
                     } else {
                         sidebar.style.cursor = '';
+                        sidebar.classList.remove('resizing');
+                        // 清除延时计时器
+                        if (sidebarShowTimer) {
+                            clearTimeout(sidebarShowTimer);
+                            sidebarShowTimer = null;
+                        }
                     }
                 }
                 return;
@@ -309,6 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('mouseup', () => {
             if (isSidebarResizing) {
                 isSidebarResizing = false;
+                sidebar.classList.remove('resizing');
                 document.body.style.cursor = '';
                 document.body.style.userSelect = '';
 
@@ -326,6 +352,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     sidebarSavedWidth = currentWidth;
                     sidebarWasAutoHidden = false;
                 }
+            }
+            // 清除延时显示计时器
+            if (sidebarShowTimer) {
+                clearTimeout(sidebarShowTimer);
+                sidebarShowTimer = null;
             }
         });
     }
