@@ -36,9 +36,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 targetView.classList.add('active');
             }
 
-            // 显示侧边栏
-            showSidebar();
+            // 先更新 currentView，再显示侧边栏
             currentView = viewName;
+            showSidebar();
         });
     });
 
