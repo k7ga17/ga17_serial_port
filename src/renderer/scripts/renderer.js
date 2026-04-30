@@ -98,6 +98,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (togglePanelBtn) {
             togglePanelBtn.classList.add('active');
         }
+        // 如果是从拖动过小自动隐藏后打开，立即显示蓝色条
+        if (panelWasAutoHidden) {
+            panel.classList.add('resizing');
+        }
     }
 
     panel.addEventListener('mousedown', (e) => {
