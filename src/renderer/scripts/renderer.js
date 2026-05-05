@@ -847,14 +847,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 添加数据到终端
     function appendToTerminal(data, type = 'received') {
-        const timestamp = new Date().toLocaleTimeString('zh-CN', { hour12: false });
+        const timestampToggle = document.getElementById('timestamp-toggle');
+        const showTimestamp = timestampToggle && timestampToggle.checked;
+
         const div = document.createElement('div');
         div.className = `data-${type}`;
 
         // 解析 ANSI 颜色
         let content = parseAnsi(data);
 
-        div.innerHTML = `<span class="timestamp">[${timestamp}]</span>${content}`;
+        // 根据开关决定是否显示时间戳
+        const timestamp = showTimestamp
+            ? `<span class="timestamp">[${new Date().toLocaleTimeString('zh-CN', { hour12: false })}]</span>`
+            : '';
+
+        div.innerHTML = `${timestamp}${content}`;
         terminalOutput.appendChild(div);
         terminalOutput.scrollTop = terminalOutput.scrollHeight;
     }
