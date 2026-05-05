@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const togglePanelBtn = document.getElementById('togglePanelBtn');
     const toggleAuxBarBtn = document.getElementById('toggleAuxBarBtn');
     const activityIcons = document.querySelectorAll('.activity-icon');
+    const terminalOutput = document.getElementById('terminal-output');
 
     // ============ 活动栏交互 ============
     let currentView = 'explorer';
@@ -118,7 +119,10 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.style.cursor = 'row-resize';
         document.body.style.userSelect = 'none';
         // 拖动期间隐藏终端滚动条
-        if (terminalOutput) terminalOutput.classList.add('no-scrollbar');
+        if (terminalOutput) {
+            terminalOutput.classList.add('no-scrollbar');
+            terminalOutput.classList.add('no-pointer');
+        }
         // 清除延时计时器
         if (panelShowTimer) {
             clearTimeout(panelShowTimer);
@@ -196,6 +200,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     isPanelResizing = false;
                     document.body.style.cursor = '';
                     document.body.style.userSelect = '';
+                    if (terminalOutput) {
+                        terminalOutput.classList.remove('no-scrollbar');
+                        terminalOutput.classList.remove('no-pointer');
+                    }
                     isLocked = false;
                     lockStartY = 0;
                     lockTimer = null;
@@ -212,7 +220,10 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.style.cursor = '';
             document.body.style.userSelect = '';
             // 恢复终端滚动条
-            if (terminalOutput) terminalOutput.classList.remove('no-scrollbar');
+            if (terminalOutput) {
+                terminalOutput.classList.remove('no-scrollbar');
+                terminalOutput.classList.remove('no-pointer');
+            }
 
             if (isLocked) {
                 isLocked = false;
@@ -220,6 +231,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (lockTimer) {
                     clearTimeout(lockTimer);
                     lockTimer = null;
+                }
+                // 如果锁定计时器触发前 mouseup，先移除滚动条限制
+                if (terminalOutput) {
+                    terminalOutput.classList.remove('no-scrollbar');
+                    terminalOutput.classList.remove('no-pointer');
                 }
             }
 
@@ -296,7 +312,10 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.style.cursor = 'col-resize';
             document.body.style.userSelect = 'none';
             // 拖动期间隐藏终端滚动条
-            if (terminalOutput) terminalOutput.classList.add('no-scrollbar');
+            if (terminalOutput) {
+                terminalOutput.classList.add('no-scrollbar');
+                terminalOutput.classList.add('no-pointer');
+            }
             // 清除延时计时器
             if (sidebarShowTimer) {
                 clearTimeout(sidebarShowTimer);
@@ -365,6 +384,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         isSidebarResizing = false;
                         document.body.style.cursor = '';
                         document.body.style.userSelect = '';
+                        if (terminalOutput) {
+                            terminalOutput.classList.remove('no-scrollbar');
+                            terminalOutput.classList.remove('no-pointer');
+                        }
                         sidebarIsLocked = false;
                         sidebarLockStartX = 0;
                         sidebarLockTimer = null;
@@ -381,7 +404,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.body.style.cursor = '';
                 document.body.style.userSelect = '';
                 // 恢复终端滚动条
-                if (terminalOutput) terminalOutput.classList.remove('no-scrollbar');
+                if (terminalOutput) {
+                    terminalOutput.classList.remove('no-scrollbar');
+                    terminalOutput.classList.remove('no-pointer');
+                }
 
                 if (sidebarIsLocked) {
                     sidebarIsLocked = false;
@@ -389,6 +415,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (sidebarLockTimer) {
                         clearTimeout(sidebarLockTimer);
                         sidebarLockTimer = null;
+                    }
+                    // 如果锁定计时器触发前 mouseup，先移除滚动条限制
+                    if (terminalOutput) {
+                        terminalOutput.classList.remove('no-scrollbar');
+                        terminalOutput.classList.remove('no-pointer');
                     }
                 }
 
@@ -475,7 +506,10 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.style.cursor = 'col-resize';
             document.body.style.userSelect = 'none';
             // 拖动期间隐藏终端滚动条
-            if (terminalOutput) terminalOutput.classList.add('no-scrollbar');
+            if (terminalOutput) {
+                terminalOutput.classList.add('no-scrollbar');
+                terminalOutput.classList.add('no-pointer');
+            }
             // 清除延时计时器
             if (auxBarShowTimer) {
                 clearTimeout(auxBarShowTimer);
@@ -546,6 +580,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         isAuxBarResizing = false;
                         document.body.style.cursor = '';
                         document.body.style.userSelect = '';
+                        if (terminalOutput) {
+                            terminalOutput.classList.remove('no-scrollbar');
+                            terminalOutput.classList.remove('no-pointer');
+                        }
                         auxBarIsLocked = false;
                         auxBarLockStartX = 0;
                         auxBarLockTimer = null;
@@ -562,7 +600,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.body.style.cursor = '';
                 document.body.style.userSelect = '';
                 // 恢复终端滚动条
-                if (terminalOutput) terminalOutput.classList.remove('no-scrollbar');
+                if (terminalOutput) {
+                    terminalOutput.classList.remove('no-scrollbar');
+                    terminalOutput.classList.remove('no-pointer');
+                }
 
                 if (auxBarIsLocked) {
                     auxBarIsLocked = false;
@@ -570,6 +611,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (auxBarLockTimer) {
                         clearTimeout(auxBarLockTimer);
                         auxBarLockTimer = null;
+                    }
+                    // 如果锁定计时器触发前 mouseup，先移除滚动条限制
+                    if (terminalOutput) {
+                        terminalOutput.classList.remove('no-scrollbar');
+                        terminalOutput.classList.remove('no-pointer');
                     }
                 }
 
@@ -685,9 +731,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const connectBtn = document.getElementById('connect-btn');
 
     // 终端相关元素
-    const terminalOutput = document.getElementById('terminal-output');
-    const serialInput = document.getElementById('serial-input');
-    const sendBtn = document.getElementById('send-btn');
     const clearTerminalBtn = document.getElementById('clear-terminal-btn');
 
     let isConnected = false;
@@ -866,29 +909,66 @@ document.addEventListener('DOMContentLoaded', () => {
         return result;
     }
 
-    // 添加数据到终端
-    function appendToTerminal(data, type = 'received') {
+    // 用于 requestAnimationFrame 的标记
+    let pendingScrollUpdate = false;
+    // 批量更新缓冲
+    let batchBuffer = [];
+    let batchTimeout = null;
+    const BATCH_DELAY = 16; // ~60fps
+    const MAX_TERMINAL_LINES = 2000; // 限制最大行数，减少 DOM 节点
+
+    // 批量添加数据到终端
+    function flushBatch() {
+        if (batchBuffer.length === 0) return;
+
+        const fragment = document.createDocumentFragment();
         const timestampToggle = document.getElementById('timestamp-toggle');
         const showTimestamp = timestampToggle && timestampToggle.checked;
 
-        const div = document.createElement('div');
-        div.className = `data-${type}`;
+        for (const { data, type } of batchBuffer) {
+            const div = document.createElement('div');
+            div.className = `data-${type}`;
+            let content = parseAnsi(data);
+            const timestamp = showTimestamp
+                ? `<span class="timestamp">[${new Date().toLocaleTimeString('zh-CN', { hour12: false })}]</span>`
+                : '';
+            div.innerHTML = `${timestamp}${content}`;
+            fragment.appendChild(div);
+        }
 
-        // 解析 ANSI 颜色
-        let content = parseAnsi(data);
+        terminalOutput.appendChild(fragment);
+        batchBuffer = [];
 
-        // 根据开关决定是否显示时间戳
-        const timestamp = showTimestamp
-            ? `<span class="timestamp">[${new Date().toLocaleTimeString('zh-CN', { hour12: false })}]</span>`
-            : '';
-
-        div.innerHTML = `${timestamp}${content}`;
-        terminalOutput.appendChild(div);
+        // 限制最大行数，超过则删除旧行
+        while (terminalOutput.children.length > MAX_TERMINAL_LINES) {
+            terminalOutput.removeChild(terminalOutput.firstChild);
+        }
 
         // 只有用户没有手动滚动时，才自动滚动到底部
         if (!isUserScrolling) {
-            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+            if (!pendingScrollUpdate) {
+                pendingScrollUpdate = true;
+                requestAnimationFrame(() => {
+                    terminalOutput.scrollTo({
+                        top: terminalOutput.scrollHeight,
+                        behavior: 'instant'
+                    });
+                    pendingScrollUpdate = false;
+                });
+            }
         }
+    }
+
+    // 添加数据到终端
+    function appendToTerminal(data, type = 'received') {
+        batchBuffer.push({ data, type });
+
+        // 防抖：如果已经有待处理的刷新，取消并重新计时
+        if (batchTimeout !== null) {
+            clearTimeout(batchTimeout);
+        }
+
+        batchTimeout = setTimeout(flushBatch, BATCH_DELAY);
     }
 
     // 监听终端滚动事件，检测用户是否手动滚动
@@ -935,20 +1015,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // 清空终端
     function clearTerminal() {
         terminalOutput.innerHTML = '';
-    }
-
-    // 发送数据
-    async function sendData() {
-        const data = serialInput.value;
-        if (!data || !isConnected) return;
-
-        try {
-            await window.electronAPI.serial.write(data);
-            appendToTerminal(data, 'sent');
-            serialInput.value = '';
-        } catch (error) {
-            console.error('Failed to send data:', error);
-        }
     }
 
     // 获取当前编码设置
@@ -1000,18 +1066,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (connectBtn) {
         connectBtn.addEventListener('click', toggleConnection);
-    }
-
-    if (sendBtn) {
-        sendBtn.addEventListener('click', sendData);
-    }
-
-    if (serialInput) {
-        serialInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                sendData();
-            }
-        });
     }
 
     if (clearTerminalBtn) {
