@@ -111,11 +111,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // 底部面板在上边界拖动，所以检测上边缘（鼠标到面板顶部的距离）
         if (e.clientY - rect.top > edgeThreshold) return;
         isPanelResizing = true;
+        isAnyPanelResizing = true;
         panel.classList.add('resizing');
         panelStartY = e.clientY;
         panelStartHeight = panel.offsetHeight;
         document.body.style.cursor = 'row-resize';
         document.body.style.userSelect = 'none';
+        // 拖动期间隐藏终端滚动条
+        if (terminalOutput) terminalOutput.classList.add('no-scrollbar');
         // 清除延时计时器
         if (panelShowTimer) {
             clearTimeout(panelShowTimer);
@@ -204,9 +207,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('mouseup', () => {
         if (isPanelResizing) {
             isPanelResizing = false;
+            isAnyPanelResizing = false;
             panel.classList.remove('resizing');
             document.body.style.cursor = '';
             document.body.style.userSelect = '';
+            // 恢复终端滚动条
+            if (terminalOutput) terminalOutput.classList.remove('no-scrollbar');
 
             if (isLocked) {
                 isLocked = false;
@@ -283,11 +289,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const edgeThreshold = 8;
             if (rect.right - e.clientX > edgeThreshold) return;
             isSidebarResizing = true;
+            isAnyPanelResizing = true;
             sidebar.classList.add('resizing');
             sidebarStartX = e.clientX;
             sidebarStartWidth = sidebar.offsetWidth;
             document.body.style.cursor = 'col-resize';
             document.body.style.userSelect = 'none';
+            // 拖动期间隐藏终端滚动条
+            if (terminalOutput) terminalOutput.classList.add('no-scrollbar');
             // 清除延时计时器
             if (sidebarShowTimer) {
                 clearTimeout(sidebarShowTimer);
@@ -367,9 +376,12 @@ document.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('mouseup', () => {
             if (isSidebarResizing) {
                 isSidebarResizing = false;
+                isAnyPanelResizing = false;
                 sidebar.classList.remove('resizing');
                 document.body.style.cursor = '';
                 document.body.style.userSelect = '';
+                // 恢复终端滚动条
+                if (terminalOutput) terminalOutput.classList.remove('no-scrollbar');
 
                 if (sidebarIsLocked) {
                     sidebarIsLocked = false;
@@ -456,11 +468,14 @@ document.addEventListener('DOMContentLoaded', () => {
             // 右侧边栏在左边界拖动，所以检测左侧边缘
             if (e.clientX - rect.left > edgeThreshold) return;
             isAuxBarResizing = true;
+            isAnyPanelResizing = true;
             auxBar.classList.add('resizing');
             auxBarStartX = e.clientX;
             auxBarStartWidth = auxBar.offsetWidth;
             document.body.style.cursor = 'col-resize';
             document.body.style.userSelect = 'none';
+            // 拖动期间隐藏终端滚动条
+            if (terminalOutput) terminalOutput.classList.add('no-scrollbar');
             // 清除延时计时器
             if (auxBarShowTimer) {
                 clearTimeout(auxBarShowTimer);
@@ -542,9 +557,12 @@ document.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('mouseup', () => {
             if (isAuxBarResizing) {
                 isAuxBarResizing = false;
+                isAnyPanelResizing = false;
                 auxBar.classList.remove('resizing');
                 document.body.style.cursor = '';
                 document.body.style.userSelect = '';
+                // 恢复终端滚动条
+                if (terminalOutput) terminalOutput.classList.remove('no-scrollbar');
 
                 if (auxBarIsLocked) {
                     auxBarIsLocked = false;
@@ -675,6 +693,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let isConnected = false;
     let isUserScrolling = false; // 用户是否正在手动滚动
     let scrollCheckTimer = null;
+    let isAnyPanelResizing = false; // 是否有任何面板正在拖动
 
     // 获取当前波特率值
     function getBaudRate() {
@@ -875,6 +894,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // 监听终端滚动事件，检测用户是否手动滚动
     if (terminalOutput) {
         terminalOutput.addEventListener('scroll', () => {
+            // 如果正在拖动面板，不更新滚动状态，避免干扰拖动
+            if (isAnyPanelResizing) return;
+
             // 计算是否在底部（允许一点误差）
             const isAtBottom = terminalOutput.scrollHeight - terminalOutput.scrollTop - terminalOutput.clientHeight < 50;
             isUserScrolling = !isAtBottom;

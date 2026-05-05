@@ -893,3 +893,12 @@ body {
 .terminal-output::-webkit-scrollbar-thumb:hover {
     background: #4f4f4f;
 }
+
+/* 拖动期间隐藏滚动条，避免干扰拖动 */
+.terminal-output.no-scrollbar {
+    scrollbar-width: none; /* Firefox */
+}
+
+.terminal-output.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
