@@ -673,6 +673,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const clearTerminalBtn = document.getElementById('clear-terminal-btn');
 
     let isConnected = false;
+    let isUserScrolling = false; // 用户是否正在手动滚动
+    let scrollCheckTimer = null;
 
     // 获取当前波特率值
     function getBaudRate() {
@@ -863,7 +865,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
         div.innerHTML = `${timestamp}${content}`;
         terminalOutput.appendChild(div);
-        terminalOutput.scrollTop = terminalOutput.scrollHeight;
+
+        // 只有用户没有手动滚动时，才自动滚动到底部
+        if (!isUserScrolling) {
+            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+        }
+    }
+
+    // 监听终端滚动事件，检测用户是否手动滚动
+    if (terminalOutput) {
+        terminalOutput.addEventListener('scroll', () => {
+            // 计算是否在底部（允许一点误差）
+            const isAtBottom = terminalOutput.scrollHeight - terminalOutput.scrollTop - terminalOutput.clientHeight < 50;
+            isUserScrolling = !isAtBottom;
+
+            // 清除之前的计时器
+            if (scrollCheckTimer) {
+                clearTimeout(scrollCheckTimer);
+            }
+
+            // 如果用户在底部，停止检测滚动状态
+            if (isAtBottom) {
+                isUserScrolling = false;
+            } else {
+                // 设置一个计时器，如果用户停止滚动一段时间后回到底部，则恢复自动滚动
+                scrollCheckTimer = setTimeout(() => {
+                    // 重新检查是否在底部
+                    const nowAtBottom = terminalOutput.scrollHeight - terminalOutput.scrollTop - terminalOutput.clientHeight < 50;
+                    if (nowAtBottom) {
+                        isUserScrolling = false;
+                    }
+                }, 2000);
+            }
+        });
     }
 
     // HTML 转义
