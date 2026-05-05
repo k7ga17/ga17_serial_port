@@ -117,7 +117,7 @@ ipcMain.handle('serial-open', async (event, options) => {
             });
         }
 
-        const { path: portPath, baudRate, dataBits, stopBits, parity, flowControl } = options;
+        const { path: portPath, baudRate, dataBits, stopBits, parity, flowControl, encoding } = options;
 
         serialPort = new SerialPort({
             path: portPath,
@@ -136,8 +136,9 @@ ipcMain.handle('serial-open', async (event, options) => {
                 // 监听数据接收
                 serialPort.on('data', (data) => {
                     if (mainWindow && !mainWindow.isDestroyed()) {
-                        // 发送原始 Buffer 数据（ArrayBuffer）给前端处理
-                        mainWindow.webContents.send('serial-data', data.toString('binary'));
+                        // 使用指定的编码解码数据
+                        const text = iconv.decode(data, encoding || 'gbk');
+                        mainWindow.webContents.send('serial-data', text);
                     }
                 });
 

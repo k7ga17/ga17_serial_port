@@ -739,7 +739,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     dataBits: dataBitsSelect.value,
                     stopBits: stopBitsSelect.value,
                     parity: paritySelect.value,
-                    flowControl: flowControlSelect.value
+                    flowControl: flowControlSelect.value,
+                    encoding: getEncoding()
                 });
 
                 if (result.success) {
@@ -887,6 +888,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // 获取当前编码设置
+    function getEncoding() {
+        const encodingSelect = document.getElementById('encoding-select');
+        return encodingSelect ? encodingSelect.value : 'gbk';
+    }
+
     // 监听串口数据
     window.electronAPI.serial.onData((data) => {
         // 获取 HEX 显示模式
@@ -901,7 +908,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             appendToTerminal(bytes.join(' '), 'received');
         } else {
-            // 文本模式：直接显示
+            // 文本模式：直接显示（编码转换已在主进程完成）
             appendToTerminal(data, 'received');
         }
     });
