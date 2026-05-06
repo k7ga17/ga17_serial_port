@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const togglePanelBtn = document.getElementById('togglePanelBtn');
     const toggleAuxBarBtn = document.getElementById('toggleAuxBarBtn');
     const activityIcons = document.querySelectorAll('.activity-icon');
-    const terminalOutput = document.getElementById('terminal-output');
 
     // ============ 活动栏交互 ============
     let currentView = 'explorer';
@@ -732,11 +731,210 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 终端相关元素
     const clearTerminalBtn = document.getElementById('clear-terminal-btn');
+    const terminalOutput = document.getElementById('terminal-output');
+    const xtermContainer = document.getElementById('xterm-container');
 
     let isConnected = false;
-    let isUserScrolling = false; // 用户是否正在手动滚动
-    let scrollCheckTimer = null;
-    let isAnyPanelResizing = false; // 是否有任何面板正在拖动
+
+    // ============ xterm.js 终端初始化 ============
+    let terminal = null;
+    let fitAddon = null;
+    let isXtermReady = false;
+
+    function initTerminal() {
+        // 检查 xterm.js 是否已加载
+        if (typeof Terminal === 'undefined') {
+            console.error('xterm.js not loaded');
+            xtermContainer.innerHTML = '<div style="color: #f44747; padding: 20px;">Error: xterm.js not loaded. Please run "npm install".</div>';
+            return;
+        }
+
+        if (!xtermContainer) {
+            console.error('xterm container not found');
+            return;
+        }
+
+        try {
+            // 创建终端实例
+            terminal = new Terminal({
+                cursorBlink: true,
+                cursorStyle: 'block',
+                fontSize: 14,
+                fontFamily: '"Cascadia Code", "Fira Code", "Consolas", monospace',
+                fontWeight: '400',
+                fontWeightBold: '700',
+                lineHeight: 1.2,
+                letterSpacing: 0,
+                scrollback: 10000,
+                theme: {
+                    background: '#1e1e1e',
+                    foreground: '#d4d4d4',
+                    cursor: '#ffffff',
+                    cursorAccent: '#1e1e1e',
+                    selection: {
+                        background: '#264f78'
+                    },
+                    selectionBackground: '#264f78',
+                    black: '#1e1e1e',
+                    red: '#f44747',
+                    green: '#6a9955',
+                    yellow: '#dcdcaa',
+                    blue: '#569cd6',
+                    magenta: '#c586c0',
+                    cyan: '#4ec9b0',
+                    white: '#d4d4d4',
+                    brightBlack: '#808080',
+                    brightRed: '#f44747',
+                    brightGreen: '#6a9955',
+                    brightYellow: '#dcdcaa',
+                    brightBlue: '#569cd6',
+                    brightMagenta: '#c586c0',
+                    brightCyan: '#4ec9b0',
+                    brightWhite: '#ffffff'
+                },
+                allowProposedApi: true
+            });
+
+            // 添加 FitAddon - 自动调整终端大小
+            if (typeof FitAddon !== 'undefined') {
+                fitAddon = new FitAddon.FitAddon();
+                terminal.loadAddon(fitAddon);
+            }
+
+            // 添加 WebLinksAddon - 支持点击链接
+            if (typeof WebLinksAddon !== 'undefined') {
+                const webLinksAddon = new WebLinksAddon.WebLinksAddon();
+                terminal.loadAddon(webLinksAddon);
+            }
+
+            // 尝试加载 WebGL 加速（可选）
+            if (typeof WebglAddon !== 'undefined') {
+                try {
+                    const webglAddon = new WebglAddon.WebglAddon();
+                    webglAddon.onContextLoss(() => {
+                        webglAddon.dispose();
+                    });
+                    terminal.loadAddon(webglAddon);
+                } catch (e) {
+                    console.log('WebGL addon not available, using canvas renderer');
+                }
+            }
+
+            // 打开终端
+            terminal.open(xtermContainer);
+
+            // 适应容器大小
+            if (fitAddon) {
+                fitAddon.fit();
+            }
+
+            isXtermReady = true;
+            console.log('Terminal initialized successfully');
+
+            // 终端准备好后显示欢迎信息
+            terminal.writeln('\x1b[1;36m╔══════════════════════════════════════════════════════════╗\x1b[0m');
+            terminal.writeln('\x1b[1;36m║           GA17 Serial Monitor - Terminal Ready          ║\x1b[0m');
+            terminal.writeln('\x1b[1;36m╚══════════════════════════════════════════════════════════╝\x1b[0m');
+            terminal.writeln('');
+            terminal.writeln('\x1b[33mSelect a serial port and click Connect to begin.\x1b[0m');
+            terminal.writeln('');
+
+            // 注册数据发送处理器 - 用户在终端输入时发送到串口
+            terminal.onData((data) => {
+                if (isConnected) {
+                    window.electronAPI.serial.write(data);
+                }
+            });
+
+        } catch (error) {
+            console.error('Failed to initialize terminal:', error);
+            xtermContainer.innerHTML = '<div style="color: #f44747; padding: 20px;">Failed to initialize terminal: ' + error.message + '</div>';
+        }
+    }
+
+    // 备用终端 - 当 xterm.js 未加载时使用
+    function createFallbackTerminal() {
+        xtermContainer.innerHTML = `
+            <div id="fallback-terminal" style="
+                width: 100%;
+                height: 100%;
+                background: #1e1e1e;
+                color: #d4d4d4;
+                font-family: 'Cascadia Code', 'Consolas', monospace;
+                font-size: 14px;
+                padding: 8px;
+                overflow-y: auto;
+                white-space: pre-wrap;
+                word-break: break-all;
+            ">
+                <div style="color: #569cd6; margin-bottom: 8px;">
+╔══════════════════════════════════════════════════════════╗
+║           GA17 Serial Monitor - Terminal Ready          ║
+╚══════════════════════════════════════════════════════════╝
+                </div>
+                <div style="color: #dcdcaa;">Select a serial port and click Connect to begin.</div>
+                <div style="margin-top: 8px;">
+                    <span style="color: #6a9955;">$</span> <span id="fallback-input" style="outline: none;" contenteditable="true"></span>
+                </div>
+            </div>
+        `;
+        isXtermReady = true;
+
+        // 监听输入
+        const fallbackInput = document.getElementById('fallback-input');
+        if (fallbackInput) {
+            fallbackInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && isConnected) {
+                    const text = fallbackInput.textContent + '\n';
+                    window.electronAPI.serial.write(text);
+                    fallbackInput.textContent = '';
+                }
+            });
+            fallbackInput.focus();
+        }
+    }
+
+    // 窗口大小变化时重新适应终端
+    function resizeTerminal() {
+        if (fitAddon && isXtermReady) {
+            fitAddon.fit();
+        }
+    }
+
+    // 页面加载后初始化终端
+    initTerminal();
+
+    // 监听窗口大小变化
+    window.addEventListener('resize', resizeTerminal);
+
+    // 面板大小变化时也要重新适应
+    const resizeObserver = new ResizeObserver(() => {
+        resizeTerminal();
+    });
+    if (terminalOutput) {
+        resizeObserver.observe(terminalOutput);
+    }
+
+    // ============ 终端写入函数 ============
+    function writeToTerminal(data) {
+        if (terminal && isXtermReady && typeof terminal.write === 'function') {
+            terminal.write(data);
+        }
+    }
+
+    // ============ 终端清空函数 ============
+    function clearTerminal() {
+        if (terminal && isXtermReady && typeof terminal.clear === 'function') {
+            terminal.clear();
+        }
+    }
+
+    // 重置光标位置
+    function resetCursor() {
+        if (terminal && isXtermReady) {
+            terminal.write('\x1b[H');
+        }
+    }
 
     // 获取当前波特率值
     function getBaudRate() {
@@ -757,6 +955,7 @@ document.addEventListener('DOMContentLoaded', () => {
             updateConnectButton();
         } catch (error) {
             console.error('Failed to refresh ports:', error);
+            writeToTerminal(`\x1b[31m[Error] Failed to refresh ports: ${error.message}\x1b[0m\r\n`);
         }
     }
 
@@ -786,10 +985,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 await window.electronAPI.serial.close();
                 isConnected = false;
                 updateConnectButton();
-                // 禁用配置选项
+                // 启用配置选项
                 setConfigDisabled(false);
+                writeToTerminal('\r\n\x1b[33m[Disconnected] Port closed\x1b[0m\r\n');
             } catch (error) {
                 console.error('Failed to close port:', error);
+                writeToTerminal(`\r\n\x1b[31m[Error] Failed to close port: ${error.message}\x1b[0m\r\n`);
             }
         } else {
             // 建立连接
@@ -797,6 +998,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!port) return;
 
             try {
+                writeToTerminal(`\x1b[36m[Connecting] Opening ${port}...\x1b[0m\r\n`);
                 const result = await window.electronAPI.serial.open({
                     path: port,
                     baudRate: getBaudRate(),
@@ -812,13 +1014,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     updateConnectButton();
                     // 禁用配置选项
                     setConfigDisabled(true);
-                    // 显示连接成功消息
+                    // 显示连接成功消息（带颜色）
                     const port = portSelect.value;
                     const baud = getBaudRate();
-                    appendToTerminal(`Connected to ${port} @ ${baud} baud`, 'system');
+                    writeToTerminal(`\r\n\x1b[32m[Connected] ${port} @ ${baud} baud\x1b[0m\r\n`);
+                } else {
+                    writeToTerminal(`\x1b[31m[Error] ${result.error || 'Failed to open port'}\x1b[0m\r\n`);
                 }
             } catch (error) {
                 console.error('Failed to open port:', error);
+                writeToTerminal(`\x1b[31m[Error] ${error.message}\x1b[0m\r\n`);
             }
         }
     }
@@ -832,214 +1037,15 @@ document.addEventListener('DOMContentLoaded', () => {
         flowControlSelect.disabled = disabled;
     }
 
-    // ANSI 颜色代码映射
-    const ansiColors = {
-        '30': '#858585', // 黑色
-        '31': '#f14c4c', // 红色
-        '32': '#4ec94e', // 绿色
-        '33': '#cca700', // 黄色
-        '34': '#569cd6', // 蓝色
-        '35': '#c586c0', // 紫红色
-        '36': '#4ec9b0', // 青色
-        '37': '#cccccc', // 白色
-        '90': '#6a9955', // 亮黑色
-        '91': '#f14c4c', // 亮红色
-        '92': '#4ec94e', // 亮绿色
-        '93': '#cca700', // 亮黄色
-        '94': '#569cd6', // 亮蓝色
-        '95': '#c586c0', // 亮紫红色
-        '96': '#4ec9b0', // 亮青色
-        '97': '#ffffff', // 亮白色
-    };
-
-    // 解析 ANSI 转义码并返回 HTML
-    function parseAnsi(text) {
-        let result = '';
-        let currentColor = '#cccccc';
-        let i = 0;
-        let buffer = '';
-
-        while (i < text.length) {
-            // 检查是否是 ANSI 转义序列
-            if (text[i] === '\x1b' || text[i] === '\033') {
-                // 先把缓冲区内容输出
-                if (buffer) {
-                    result += `<span style="color:${currentColor}">${buffer}</span>`;
-                    buffer = '';
-                }
-
-                // 检查是否是 [ 开头
-                if (text[i + 1] === '[') {
-                    i += 2;
-                    // 收集数字
-                    let codes = '';
-                    while (i < text.length && (text[i] >= '0' && text[i] <= '9' || text[i] === ';')) {
-                        codes += text[i];
-                        i++;
-                    }
-
-                    // 处理代码
-                    const codeList = codes.split(';').filter(c => c !== '');
-                    for (const code of codeList) {
-                        if (code === '0' || code === '') {
-                            currentColor = '#cccccc';
-                        } else if (ansiColors[code]) {
-                            currentColor = ansiColors[code];
-                        } else if (code === '1') {
-                            // 粗体，继续保持颜色
-                        }
-                    }
-
-                    // 跳过最后一个字符（通常是 m）
-                    if (text[i] === 'm') i++;
-                } else {
-                    i++;
-                }
-            } else {
-                buffer += text[i];
-                i++;
-            }
-        }
-
-        // 输出剩余缓冲区
-        if (buffer) {
-            result += `<span style="color:${currentColor}">${buffer}</span>`;
-        }
-
-        return result;
-    }
-
-    // 用于 requestAnimationFrame 的标记
-    let pendingScrollUpdate = false;
-    // 批量更新缓冲
-    let batchBuffer = [];
-    let batchTimeout = null;
-    const BATCH_DELAY = 16; // ~60fps
-    const MAX_TERMINAL_LINES = 2000; // 限制最大行数，减少 DOM 节点
-
-    // 批量添加数据到终端
-    function flushBatch() {
-        if (batchBuffer.length === 0) return;
-
-        const fragment = document.createDocumentFragment();
-        const timestampToggle = document.getElementById('timestamp-toggle');
-        const showTimestamp = timestampToggle && timestampToggle.checked;
-
-        for (const { data, type } of batchBuffer) {
-            const div = document.createElement('div');
-            div.className = `data-${type}`;
-            let content = parseAnsi(data);
-            const timestamp = showTimestamp
-                ? `<span class="timestamp">[${new Date().toLocaleTimeString('zh-CN', { hour12: false })}]</span>`
-                : '';
-            div.innerHTML = `${timestamp}${content}`;
-            fragment.appendChild(div);
-        }
-
-        terminalOutput.appendChild(fragment);
-        batchBuffer = [];
-
-        // 限制最大行数，超过则删除旧行
-        while (terminalOutput.children.length > MAX_TERMINAL_LINES) {
-            terminalOutput.removeChild(terminalOutput.firstChild);
-        }
-
-        // 只有用户没有手动滚动时，才自动滚动到底部
-        if (!isUserScrolling) {
-            if (!pendingScrollUpdate) {
-                pendingScrollUpdate = true;
-                requestAnimationFrame(() => {
-                    terminalOutput.scrollTo({
-                        top: terminalOutput.scrollHeight,
-                        behavior: 'instant'
-                    });
-                    pendingScrollUpdate = false;
-                });
-            }
-        }
-    }
-
-    // 添加数据到终端
-    function appendToTerminal(data, type = 'received') {
-        batchBuffer.push({ data, type });
-
-        // 防抖：如果已经有待处理的刷新，取消并重新计时
-        if (batchTimeout !== null) {
-            clearTimeout(batchTimeout);
-        }
-
-        batchTimeout = setTimeout(flushBatch, BATCH_DELAY);
-    }
-
-    // 监听终端滚动事件，检测用户是否手动滚动
-    if (terminalOutput) {
-        terminalOutput.addEventListener('scroll', () => {
-            // 如果正在拖动面板，不更新滚动状态，避免干扰拖动
-            if (isAnyPanelResizing) return;
-
-            // 计算是否在底部（允许一点误差）
-            const isAtBottom = terminalOutput.scrollHeight - terminalOutput.scrollTop - terminalOutput.clientHeight < 50;
-            isUserScrolling = !isAtBottom;
-
-            // 清除之前的计时器
-            if (scrollCheckTimer) {
-                clearTimeout(scrollCheckTimer);
-            }
-
-            // 如果用户在底部，停止检测滚动状态
-            if (isAtBottom) {
-                isUserScrolling = false;
-            } else {
-                // 设置一个计时器，如果用户停止滚动一段时间后回到底部，则恢复自动滚动
-                scrollCheckTimer = setTimeout(() => {
-                    // 重新检查是否在底部
-                    const nowAtBottom = terminalOutput.scrollHeight - terminalOutput.scrollTop - terminalOutput.clientHeight < 50;
-                    if (nowAtBottom) {
-                        isUserScrolling = false;
-                    }
-                }, 2000);
-            }
-        });
-    }
-
-    // HTML 转义
-    function escapeHtml(text) {
-        if (typeof text !== 'string') text = String(text);
-        return text.replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/ /g, '&nbsp;');
-    }
-
-    // 清空终端
-    function clearTerminal() {
-        terminalOutput.innerHTML = '';
-    }
-
     // 获取当前编码设置
     function getEncoding() {
         const encodingSelect = document.getElementById('encoding-select');
         return encodingSelect ? encodingSelect.value : 'gbk';
     }
 
-    // 监听串口数据
+    // 监听串口数据 - 使用 xterm.js 显示
     window.electronAPI.serial.onData((data) => {
-        // 获取 HEX 显示模式
-        const hexToggle = document.getElementById('hex-display-toggle');
-        const isHexMode = hexToggle && hexToggle.checked;
-
-        if (isHexMode) {
-            // 16进制模式：将字符串转换为 16 进制显示
-            const bytes = [];
-            for (let i = 0; i < data.length; i++) {
-                bytes.push(data.charCodeAt(i).toString(16).toUpperCase().padStart(2, '0'));
-            }
-            appendToTerminal(bytes.join(' '), 'received');
-        } else {
-            // 文本模式：直接显示（编码转换已在主进程完成）
-            appendToTerminal(data, 'received');
-        }
+        writeToTerminal(data);
     });
 
     // 监听串口状态
@@ -1049,9 +1055,9 @@ document.addEventListener('DOMContentLoaded', () => {
             isConnected = false;
             updateConnectButton();
             setConfigDisabled(false);
-            appendToTerminal('Port disconnected', 'system');
+            writeToTerminal('\r\n\x1b[33m[Warning] Port disconnected\x1b[0m\r\n');
         } else if (status.type === 'error') {
-            appendToTerminal(`Error: ${status.message}`, 'system');
+            writeToTerminal(`\r\n\x1b[31m[Error] ${status.message}\x1b[0m\r\n`);
         }
     });
 
