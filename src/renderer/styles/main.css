@@ -20,21 +20,206 @@ body {
 /* ============ 应用容器 ============ */
 #app {
     display: flex;
-    flex-direction: column;
+    flex-direction: column; /* 垂直布局 */
     width: 100%;
     height: 100%;
 }
 
-/* ============ 顶部标题栏 ============ */
+/*=======================================================================*/
+/* ============ 【1】顶部标题栏 ============ */
 #titleBar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
     height: 32px;
+    display: flex;
+    align-items: center; /* 子元素垂直居中 */
+    justify-content: space-between; /* 子元素水平居左和居右 */
     background: #323233;
     border-bottom: 1px solid #181818;
-    -webkit-app-region: drag;
+    -webkit-app-region: drag; /* Electron 中将此区域设为可拖动（用于窗口拖拽） */
+    flex-shrink: 0; /* 当空间不足时，此元素不会被压缩缩小 */
+}
+
+/*=======================================================================*/
+/* ============ 【2】中间区域 ============ */
+#centerArea {
+    flex: 1; /* 占据所有剩余空间 */
+    display: flex;
+    flex-direction: row;
+    overflow: hidden; /* 隐藏溢出内容 */
+}
+
+/*---------------------------------------------------*/
+/* ============ 【2.A】左侧功能/活动栏 ============ */
+#activityBar {
+    width: 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #333333;
+    border-right: 1px solid #181818;
     flex-shrink: 0;
+}
+
+/*---------------------------------------------------*/
+/* ============ 【2.B】右侧主显示区域 ============ */
+/* ============ 工作区 ============ */
+#workspace {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: row;
+    overflow: hidden;
+    align-items: stretch;
+    min-height: 100px;
+    min-width: 0;
+}
+
+/*=================================START=================================*/
+/* 【a】左侧边栏 */
+#sideBar {
+    background: #252526;
+    border-right: 1px solid transparent;
+    overflow: hidden;
+    width: 0;
+    min-width: 0;
+    flex-shrink: 0;
+    position: relative;
+}
+
+#sideBar.visible {
+    width: 250px;
+    border-right-color: #3c3c3c;
+    min-width: 150px;
+    max-width: 500px;
+}
+
+/* 左侧边栏右边缘拖动区域指示 */
+#sideBar::before { /* 在元素内容之前插入的一个虚拟元素/伪元素 */
+    content: '';
+    position: absolute; /* 绝对定位，不占用空间 */
+    right: 0; /* 定位到右侧边缘 */
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: transparent; /* 默认透明 */
+    transition: background 0.15s; /* 悬停时变色过渡 */
+    pointer-events: none; /* 不阻挡鼠标事件 */
+    z-index: 5; /* 层级 */
+}
+
+/* 左侧边栏在拖动时显示蓝色条 */
+#sideBar.resizing::before {
+    background: #007acc;
+}
+
+/*---------------------------------------------------*/
+/* 【b】中间区域（编辑区 + 底部面板） */
+#centerContent {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 200px;
+    min-height: 0;
+}
+
+/*---------------------------------------------------*/
+/* 【b.1】主编辑区 */
+#editorArea {
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+    background: #1e1e1e;
+    overflow: hidden;
+}
+
+/*---------------------------------------------------*/
+/* 【b.2】底部面板 */
+#panel {
+    background: #1e1e1e;
+    border-top: 1px solid transparent;
+    overflow: hidden;
+    height: 0;
+    min-height: 0;
+    flex-shrink: 0;
+    position: relative;
+}
+
+#panel.visible {
+    height: 200px;
+    border-top-color: #3c3c3c;
+    min-height: 150px;
+    max-height: 500px;
+}
+
+/* 底部面板上边缘拖动区域指示 */
+#panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: transparent;
+    transition: background 0.15s; /* 悬停时变色过渡 */
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* 底部面板在拖动时显示蓝色条 */
+#panel.resizing::before {
+    background: #007acc;
+}
+
+/*---------------------------------------------------*/
+/* 【c】右侧边栏 */
+#auxBar {
+    background: #252526;
+    border-left: 1px solid transparent;
+    overflow: hidden;
+    width: 0;
+    min-width: 0;
+    flex-shrink: 0;
+    position: relative;
+}
+
+#auxBar.visible {
+    width: 250px;
+    border-left-color: #3c3c3c;
+    min-width: 150px;
+    max-width: 500px;
+}
+
+/* 右侧边栏左边缘拖动区域指示 */
+#auxBar::before { /* 在元素内容之前插入的一个虚拟元素/伪元素 */
+    content: '';
+    position: absolute; /* 绝对定位，不占用空间 */
+    left: 0; /* 定位到左侧边缘 */
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: transparent; /* 默认透明 */
+    transition: background 0.15s; /* 悬停时变色过渡 */
+    pointer-events: none; /* 不阻挡鼠标事件 */
+    z-index: 5; /* 层级 */
+}
+
+/* 右侧边栏在拖动时显示蓝色条 */
+#auxBar.resizing::before {
+    background: #007acc;
+}
+/*__________________________________END__________________________________*/
+
+/*=======================================================================*/
+/* ============ 【3】状态栏 ============ */
+#statusBar {
+    height: 22px;
+    display: flex;
+    align-items: center; /* 子元素垂直居中 */
+    justify-content: space-between; /* 子元素水平居左和居右 */
+    background: #007acc;
+    color: #ffffff;
+    font-size: 12px;
+    padding: 0 8px;
+    flex-shrink: 0; /* 当空间不足时，此元素不会被压缩缩小 */
 }
 
 #titleMenu {
@@ -160,23 +345,9 @@ body {
     display: none !important;
 }
 
-/* ============ 中间区域 ============ */
-#centerArea {
-    flex: 1;
-    display: flex;
-    overflow: hidden;
-}
 
-/* ============ 左侧功能栏 ============ */
-#activityBar {
-    width: 48px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background: #333333;
-    border-right: 1px solid #181818;
-    flex-shrink: 0;
-}
+
+
 
 .activity-icon {
     width: 48px;
@@ -226,165 +397,10 @@ body {
     fill: #ffffff;
 }
 
-/* ============ 右侧主显示区域 ============ */
-#mainArea {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
 
-/* ============ 工作区 ============ */
-#workspace {
-    flex: 1 1 auto;
-    display: flex;
-    overflow: hidden;
-    align-items: stretch;
-    min-height: 100px;
-    min-width: 0;
-}
 
-/* 左侧边栏 */
-#sidebar {
-    background: #252526;
-    border-right: 1px solid #3c3c3c;
-    overflow: hidden;
-    width: 0;
-    min-width: 0;
-    flex-shrink: 0;
-    flex-grow: 0;
-    position: relative;
-}
 
-#sidebar.visible {
-    width: 250px;
-    min-width: 150px;
-    max-width: 500px;
-    flex-shrink: 0;
-    flex-grow: 0;
-}
 
-/* 左侧边栏右边缘拖动区域指示 */
-#sidebar::before {
-    content: '';
-    position: absolute;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    background: transparent;
-    transition: background 0.15s;
-    pointer-events: none;
-    z-index: 5;
-}
-
-/* 左侧边栏在拖动时显示蓝色条 */
-#sidebar.resizing::before {
-    background: #007acc;
-}
-
-/* 左侧边栏拖动条 */
-/* 中间区域（编辑区 + 底部面板） */
-#centerContent {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    min-width: 200px;
-    min-height: 0;
-}
-
-/* 主编辑区 */
-#editorArea {
-    flex: 1;
-    min-height: 0;
-    min-width: 0;
-    background: #1e1e1e;
-    overflow: hidden;
-}
-
-/* 右侧边栏 */
-#auxBar {
-    background: #252526;
-    border-left: 1px solid #3c3c3c;
-    overflow: hidden;
-    width: 0;
-    min-width: 0;
-    flex-shrink: 0;
-    position: relative;
-}
-
-#auxBar.visible {
-    width: 250px;
-    min-width: 150px;
-    max-width: 500px;
-}
-
-/* 右侧边栏左边缘拖动区域指示 */
-#auxBar::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    background: transparent;
-    transition: background 0.15s;
-    pointer-events: none;
-    z-index: 5;
-}
-
-/* 右侧边栏在拖动时显示蓝色条 */
-#auxBar.resizing::before {
-    background: #007acc;
-}
-
-/* ============ 底部面板 ============ */
-#panel {
-    background: #1e1e1e;
-    border-top: 1px solid transparent;
-    overflow: hidden;
-    height: 0;
-    flex-shrink: 0;
-    position: relative;
-}
-
-#panel.visible {
-    height: 200px;
-    border-top-color: #3c3c3c;
-}
-
-/* 底部面板上边缘拖动区域指示 */
-#panel::before {
-    content: '';
-    position: absolute;
-    top: -1px;
-    left: 0;
-    right: 0;
-    height: 5px;
-    background: transparent;
-    pointer-events: none;
-    z-index: 10;
-}
-
-/* 底部面板在拖动时显示蓝色条 */
-#panel.resizing::before {
-    background: #007acc;
-}
-
-/* 拖动调整条 */
-.panel-resizer {
-    height: 4px;
-    background: transparent;
-    flex-shrink: 0;
-    cursor: row-resize;
-    position: relative;
-    z-index: 10;
-}
-
-.panel-resizer:hover {
-    background: transparent;
-}
 
 /* 面板通用样式 */
 .panel-header {
@@ -407,13 +423,13 @@ body {
 }
 
 /* 侧边栏视图 */
-.sidebar-view {
+.sideBar-view {
     display: none;
     flex-direction: column;
     height: 100%;
 }
 
-.sidebar-view.active {
+.sideBar-view.active {
     display: flex;
 }
 
@@ -460,18 +476,7 @@ body {
     color: #858585;
 }
 
-/* ============ 状态栏 ============ */
-#statusBar {
-    height: 22px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: #007acc;
-    color: #ffffff;
-    font-size: 12px;
-    padding: 0 8px;
-    flex-shrink: 0;
-}
+
 
 .status-left,
 .status-right {

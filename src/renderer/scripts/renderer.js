@@ -1,10 +1,10 @@
 // 渲染进程脚本
 document.addEventListener('DOMContentLoaded', () => {
     // ============ 面板元素 ============
-    const sidebar = document.getElementById('sidebar');
+    const sideBar = document.getElementById('sideBar');
     const auxBar = document.getElementById('auxBar');
     const panel = document.getElementById('panel');
-    const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
+    const toggleSideBarBtn = document.getElementById('toggleSideBarBtn');
     const togglePanelBtn = document.getElementById('togglePanelBtn');
     const toggleAuxBarBtn = document.getElementById('toggleAuxBarBtn');
     const activityIcons = document.querySelectorAll('.activity-icon');
@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
             icon.classList.add('active');
 
             // 切换视图内容
-            document.querySelectorAll('.sidebar-view').forEach(view => {
+            document.querySelectorAll('.sideBar-view').forEach(view => {
                 view.classList.remove('active');
             });
             const targetView = document.getElementById('view-' + viewName);
@@ -253,24 +253,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ============ 左侧边栏拖动调整 ============
     let isSidebarResizing = false;
-    let sidebarStartX = 0;
-    let sidebarStartWidth = 0;
-    let sidebarSavedWidth = 250; // 保存用户调整后的宽度
-    const sidebarDefaultWidth = 250; // 默认宽度
-    const sidebarMinThreshold = 80; // 触发隐藏的阈值
-    let sidebarWasAutoHidden = false; // 是否因拖动过窄而自动隐藏
+    let sideBarStartX = 0;
+    let sideBarStartWidth = 0;
+    let sideBarSavedWidth = 250; // 保存用户调整后的宽度
+    const sideBarDefaultWidth = 250; // 默认宽度
+    const sideBarMinThreshold = 80; // 触发隐藏的阈值
+    let sideBarWasAutoHidden = false; // 是否因拖动过窄而自动隐藏
 
     function hideSidebar(isAuto = false) {
-        sidebar.classList.remove('visible');
-        sidebar.style.width = '';
-        if (toggleSidebarBtn) {
-            toggleSidebarBtn.classList.remove('active');
+        sideBar.classList.remove('visible');
+        sideBar.style.width = '';
+        if (toggleSideBarBtn) {
+            toggleSideBarBtn.classList.remove('active');
         }
         if (isAuto) {
-            sidebarWasAutoHidden = true;
-            sidebarSavedWidth = sidebarDefaultWidth;
+            sideBarWasAutoHidden = true;
+            sideBarSavedWidth = sideBarDefaultWidth;
         } else {
-            sidebarWasAutoHidden = false;
+            sideBarWasAutoHidden = false;
         }
         // 取消活动栏选中状态
         activityIcons.forEach(i => i.classList.remove('active'));
@@ -278,10 +278,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function showSidebar() {
-        sidebar.classList.add('visible');
-        sidebar.style.width = sidebarSavedWidth + 'px';
-        if (toggleSidebarBtn) {
-            toggleSidebarBtn.classList.add('active');
+        sideBar.classList.add('visible');
+        sideBar.style.width = sideBarSavedWidth + 'px';
+        if (toggleSideBarBtn) {
+            toggleSideBarBtn.classList.add('active');
         }
         // 激活对应的活动栏图标
         activityIcons.forEach(i => {
@@ -292,22 +292,22 @@ document.addEventListener('DOMContentLoaded', () => {
         isSidebarVisible = true;
     }
 
-    if (sidebar) {
-        let sidebarIsLocked = false;
-        let sidebarLockTimer = null;
-        let sidebarLockStartX = 0;
-        let sidebarShowTimer = null; // 延时显示蓝色条的计时器
+    if (sideBar) {
+        let sideBarIsLocked = false;
+        let sideBarLockTimer = null;
+        let sideBarLockStartX = 0;
+        let sideBarShowTimer = null; // 延时显示蓝色条的计时器
 
-        sidebar.addEventListener('mousedown', (e) => {
-            if (!sidebar.classList.contains('visible')) return;
-            const rect = sidebar.getBoundingClientRect();
+        sideBar.addEventListener('mousedown', (e) => {
+            if (!sideBar.classList.contains('visible')) return;
+            const rect = sideBar.getBoundingClientRect();
             const edgeThreshold = 8;
             if (rect.right - e.clientX > edgeThreshold) return;
             isSidebarResizing = true;
             isAnyPanelResizing = true;
-            sidebar.classList.add('resizing');
-            sidebarStartX = e.clientX;
-            sidebarStartWidth = sidebar.offsetWidth;
+            sideBar.classList.add('resizing');
+            sideBarStartX = e.clientX;
+            sideBarStartWidth = sideBar.offsetWidth;
             document.body.style.cursor = 'col-resize';
             document.body.style.userSelect = 'none';
             // 拖动期间隐藏终端滚动条
@@ -316,69 +316,69 @@ document.addEventListener('DOMContentLoaded', () => {
                 terminalOutput.classList.add('no-pointer');
             }
             // 清除延时计时器
-            if (sidebarShowTimer) {
-                clearTimeout(sidebarShowTimer);
-                sidebarShowTimer = null;
+            if (sideBarShowTimer) {
+                clearTimeout(sideBarShowTimer);
+                sideBarShowTimer = null;
             }
         });
 
         document.addEventListener('mousemove', (e) => {
             if (!isSidebarResizing) {
-                if (sidebar.classList.contains('visible')) {
-                    const rect = sidebar.getBoundingClientRect();
+                if (sideBar.classList.contains('visible')) {
+                    const rect = sideBar.getBoundingClientRect();
                     if (rect.right - e.clientX <= 8 && rect.right - e.clientX >= 0) {
-                        sidebar.style.cursor = 'col-resize';
+                        sideBar.style.cursor = 'col-resize';
                         // 延时700ms后显示蓝色条
-                        if (!sidebarShowTimer) {
-                            sidebarShowTimer = setTimeout(() => {
-                                if (sidebar.classList.contains('visible')) {
-                                    const rect = sidebar.getBoundingClientRect();
+                        if (!sideBarShowTimer) {
+                            sideBarShowTimer = setTimeout(() => {
+                                if (sideBar.classList.contains('visible')) {
+                                    const rect = sideBar.getBoundingClientRect();
                                     if (rect.right - e.clientX <= 8 && rect.right - e.clientX >= 0) {
-                                        sidebar.classList.add('resizing');
+                                        sideBar.classList.add('resizing');
                                     }
                                 }
-                                sidebarShowTimer = null;
+                                sideBarShowTimer = null;
                             }, 700);
                         }
                     } else {
-                        sidebar.style.cursor = '';
-                        sidebar.classList.remove('resizing');
+                        sideBar.style.cursor = '';
+                        sideBar.classList.remove('resizing');
                         // 清除延时计时器
-                        if (sidebarShowTimer) {
-                            clearTimeout(sidebarShowTimer);
-                            sidebarShowTimer = null;
+                        if (sideBarShowTimer) {
+                            clearTimeout(sideBarShowTimer);
+                            sideBarShowTimer = null;
                         }
                     }
                 }
                 return;
             }
 
-            if (sidebarIsLocked) {
-                if (e.clientX > sidebarLockStartX) {
-                    sidebarIsLocked = false;
-                    sidebarLockStartX = 0;
-                    if (sidebarLockTimer) {
-                        clearTimeout(sidebarLockTimer);
-                        sidebarLockTimer = null;
+            if (sideBarIsLocked) {
+                if (e.clientX > sideBarLockStartX) {
+                    sideBarIsLocked = false;
+                    sideBarLockStartX = 0;
+                    if (sideBarLockTimer) {
+                        clearTimeout(sideBarLockTimer);
+                        sideBarLockTimer = null;
                     }
-                    sidebarStartX = e.clientX;
-                    sidebarStartWidth = sidebar.offsetWidth;
+                    sideBarStartX = e.clientX;
+                    sideBarStartWidth = sideBar.offsetWidth;
                 }
                 return;
             }
 
-            const deltaX = e.clientX - sidebarStartX;
-            let newWidth = sidebarStartWidth + deltaX;
+            const deltaX = e.clientX - sideBarStartX;
+            let newWidth = sideBarStartWidth + deltaX;
             newWidth = Math.max(0, Math.min(newWidth, 500));
-            sidebar.style.width = newWidth + 'px';
+            sideBar.style.width = newWidth + 'px';
 
-            if (newWidth < sidebarMinThreshold) {
-                sidebarIsLocked = true;
-                sidebarLockStartX = e.clientX;
-                sidebar.style.width = sidebarMinThreshold + 'px';
+            if (newWidth < sideBarMinThreshold) {
+                sideBarIsLocked = true;
+                sideBarLockStartX = e.clientX;
+                sideBar.style.width = sideBarMinThreshold + 'px';
 
-                sidebarLockTimer = setTimeout(() => {
-                    if (sidebarIsLocked) {
+                sideBarLockTimer = setTimeout(() => {
+                    if (sideBarIsLocked) {
                         hideSidebar(true);
                         isSidebarResizing = false;
                         document.body.style.cursor = '';
@@ -387,9 +387,9 @@ document.addEventListener('DOMContentLoaded', () => {
                             terminalOutput.classList.remove('no-scrollbar');
                             terminalOutput.classList.remove('no-pointer');
                         }
-                        sidebarIsLocked = false;
-                        sidebarLockStartX = 0;
-                        sidebarLockTimer = null;
+                        sideBarIsLocked = false;
+                        sideBarLockStartX = 0;
+                        sideBarLockTimer = null;
                     }
                 }, 500);
             }
@@ -399,7 +399,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isSidebarResizing) {
                 isSidebarResizing = false;
                 isAnyPanelResizing = false;
-                sidebar.classList.remove('resizing');
+                sideBar.classList.remove('resizing');
                 document.body.style.cursor = '';
                 document.body.style.userSelect = '';
                 // 恢复终端滚动条
@@ -408,12 +408,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     terminalOutput.classList.remove('no-pointer');
                 }
 
-                if (sidebarIsLocked) {
-                    sidebarIsLocked = false;
-                    sidebarLockStartX = 0;
-                    if (sidebarLockTimer) {
-                        clearTimeout(sidebarLockTimer);
-                        sidebarLockTimer = null;
+                if (sideBarIsLocked) {
+                    sideBarIsLocked = false;
+                    sideBarLockStartX = 0;
+                    if (sideBarLockTimer) {
+                        clearTimeout(sideBarLockTimer);
+                        sideBarLockTimer = null;
                     }
                     // 如果锁定计时器触发前 mouseup，先移除滚动条限制
                     if (terminalOutput) {
@@ -422,25 +422,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
 
-                const currentWidth = sidebar.offsetWidth;
-                if (currentWidth >= sidebarMinThreshold) {
-                    sidebarSavedWidth = currentWidth;
-                    sidebarWasAutoHidden = false;
+                const currentWidth = sideBar.offsetWidth;
+                if (currentWidth >= sideBarMinThreshold) {
+                    sideBarSavedWidth = currentWidth;
+                    sideBarWasAutoHidden = false;
                 }
             }
             // 清除延时显示计时器
-            if (sidebarShowTimer) {
-                clearTimeout(sidebarShowTimer);
-                sidebarShowTimer = null;
+            if (sideBarShowTimer) {
+                clearTimeout(sideBarShowTimer);
+                sideBarShowTimer = null;
             }
         });
     }
 
     // 同步侧边栏按钮与显示状态
-    if (toggleSidebarBtn) {
-        toggleSidebarBtn.addEventListener('click', () => {
-            if (sidebar) {
-                const wasVisible = sidebar.classList.contains('visible');
+    if (toggleSideBarBtn) {
+        toggleSideBarBtn.addEventListener('click', () => {
+            if (sideBar) {
+                const wasVisible = sideBar.classList.contains('visible');
                 if (wasVisible) {
                     hideSidebar();
                 } else {
@@ -650,7 +650,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Ctrl/Cmd + B - 切换左侧边栏
         if ((e.ctrlKey || e.metaKey) && e.key === 'b' && !e.altKey) {
             e.preventDefault();
-            if (toggleSidebarBtn) toggleSidebarBtn.click();
+            if (toggleSideBarBtn) toggleSideBarBtn.click();
         }
         // Ctrl/Cmd + J - 切换底部面板
         if ((e.ctrlKey || e.metaKey) && e.key === 'j') {
