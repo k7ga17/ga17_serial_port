@@ -35,7 +35,8 @@ body {
     align-items: center; /* 子元素垂直居中 */
     justify-content: space-between; /* 子元素水平居左和居右 */
     background: #323233;
-    border-bottom: 1px solid #181818;
+    /* border-bottom: 1px solid #181818; */
+    border-bottom: 1px solid yellow;
     -webkit-app-region: drag; /* Electron 中将此区域设为可拖动（用于窗口拖拽） */
     flex-shrink: 0; /* 当空间不足时，此元素不会被压缩缩小 */
 }
@@ -53,7 +54,8 @@ body {
     align-items: center; /* 子元素垂直居中 */
     justify-content: space-between; /* 子元素水平居左和居右 */
     background: #007acc;
-    border-top: 1px solid #181818;
+    /* border-top: 1px solid #181818; */
+    border-top: 1px solid yellow;
     color: #ffffff;
     font-size: 12px;
     padding: 0 8px;
@@ -69,7 +71,8 @@ body {
     flex-direction: column;
     align-items: center;
     background: #333333;
-    border-right: 1px solid #181818;
+    /* border-right: 1px solid #181818; */
+    border-right: 1px solid cyan;
     flex-shrink: 0;
 }
 /* ============ 【2.B】右侧主显示区域 ============ */
@@ -89,7 +92,6 @@ body {
 /* 【2.B.1】左侧边栏 */
 #sideBar {
     background: #252526;
-    border-right: 1px solid transparent;
     overflow: hidden;
     width: 0;
     min-width: 0;
@@ -99,7 +101,8 @@ body {
 
 #sideBar.visible {
     width: 250px;
-    border-right-color: #3c3c3c;
+    /* border-right: 1px solid #3c3c3c; */
+    border-right: 1px solid green;
     min-width: 150px;
     max-width: 500px;
 }
@@ -136,7 +139,6 @@ body {
 /* 【2.B.3】右侧边栏 */
 #auxBar {
     background: #252526;
-    border-left: 1px solid transparent;
     overflow: hidden;
     width: 0;
     min-width: 0;
@@ -146,7 +148,8 @@ body {
 
 #auxBar.visible {
     width: 250px;
-    border-left-color: #3c3c3c;
+    /* border-left: 1px solid #3c3c3c; */
+    border-left: 1px solid green;
     min-width: 150px;
     max-width: 500px;
 }
@@ -184,7 +187,6 @@ body {
 /* 【2.B.2.2】底部面板 */
 #panel {
     background: #1e1e1e;
-    border-top: 1px solid transparent;
     overflow: hidden;
     height: 0;
     min-height: 0;
@@ -194,7 +196,8 @@ body {
 
 #panel.visible {
     height: 200px;
-    border-top-color: #3c3c3c;
+    /* border-top: 1px, solid #3c3c3c; */
+    border-top: 1px, solid green;
     min-height: 150px;
     max-height: 500px;
 }
