@@ -771,9 +771,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     foreground: '#d4d4d4',
                     cursor: '#ffffff',
                     cursorAccent: '#1e1e1e',
-                    selection: {
-                        background: '#264f78'
-                    },
                     selectionBackground: '#264f78',
                     black: '#1e1e1e',
                     red: '#f44747',
@@ -807,7 +804,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 terminal.loadAddon(webLinksAddon);
             }
 
-            // 尝试加载 WebGL 加速（可选）
+            // 加载 WebGL 加速（可选，不可用时静默忽略）
             if (typeof WebglAddon !== 'undefined') {
                 try {
                     const webglAddon = new WebglAddon.WebglAddon();
@@ -816,16 +813,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                     terminal.loadAddon(webglAddon);
                 } catch (e) {
-                    console.log('WebGL addon not available, using canvas renderer');
+                    // WebGL 不可用时使用 canvas 渲染器，这是预期行为
                 }
             }
 
             // 打开终端
             terminal.open(xtermContainer);
 
-            // 适应容器大小
+            // 适应容器大小 - 延迟一下让容器先完成布局
             if (fitAddon) {
-                fitAddon.fit();
+                requestAnimationFrame(() => {
+                    fitAddon.fit();
+                });
             }
 
             isXtermReady = true;
@@ -833,7 +832,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 终端准备好后显示欢迎信息
             terminal.writeln('\x1b[1;36m╔══════════════════════════════════════════════════════════╗\x1b[0m');
-            terminal.writeln('\x1b[1;36m║           GA17 Serial Monitor - Terminal Ready          ║\x1b[0m');
+            terminal.writeln('\x1b[1;36m║           GA17 Serial Monitor - Terminal Ready           ║\x1b[0m');
             terminal.writeln('\x1b[1;36m╚══════════════════════════════════════════════════════════╝\x1b[0m');
             terminal.writeln('');
             terminal.writeln('\x1b[33mSelect a serial port and click Connect to begin.\x1b[0m');
@@ -911,8 +910,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const resizeObserver = new ResizeObserver(() => {
         resizeTerminal();
     });
-    if (terminalOutput) {
-        resizeObserver.observe(terminalOutput);
+    if (xtermContainer) {
+        resizeObserver.observe(xtermContainer);
     }
 
     // ============ 终端写入函数 ============

@@ -14,7 +14,13 @@ body {
     font-size: 14px;
     color: #cccccc;
     background: #1e1e1e;
-    user-select: none;
+}
+
+/* 允许在终端区域选择文本 */
+#xterm-container,
+.xterm {
+    user-select: text;
+    -webkit-user-select: text;
 }
 
 /* ============ 应用容器 ============ */
@@ -197,7 +203,7 @@ body {
 #panel.visible {
     height: 200px;
     /* border-top: 1px, solid #3c3c3c; */
-    border-top: 1px, solid green;
+    border-top: 1px solid green;
     min-height: 150px;
     max-height: 500px;
 }
@@ -721,17 +727,20 @@ body {
 
 /* ============ xterm.js 终端容器样式 ============ */
 #xterm-container {
+    flex: 1;
+    min-height: 0;
     width: 100%;
-    height: 100%;
     padding: 0;
     margin: 0;
 }
 
+/*---------------------------------------------------*/
 /* xterm.js 终端主体 */
 .xterm {
-    width: 100% !important;
-    height: 100% !important;
-    padding: 8px !important;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
 }
 
 .xterm-viewport {
@@ -759,40 +768,12 @@ body {
     background-clip: padding-box;
 }
 
-/* 修复 xterm 与父容器高度一致 */
-.terminal-output {
-    position: relative;
-    height: 100%;
-    width: 100%;
-    overflow: hidden;
-    padding: 0;
-    font-family: "Cascadia Code", "Consolas", "Courier New", monospace;
-    font-size: 14px;
-    color: #cccccc;
-    /* flex 布局 */
-    display: flex;
-    flex-direction: column;
-}
-
-/* 拖动期间隐藏 xterm 滚动条 */
-.terminal-output.no-scrollbar .xterm-viewport {
-    scrollbar-width: none;
-}
-
-.terminal-output.no-scrollbar .xterm-viewport::-webkit-scrollbar {
-    display: none;
-}
-
-/* 拖动期间禁用终端区域的鼠标事件 */
-.terminal-output.no-pointer {
-    pointer-events: none;
-}
-
 /* ============ 串口终端样式 ============ */
 .terminal-view {
     display: flex;
     flex-direction: column;
     height: 100%;
+    min-height: 0;
     background: #1e1e1e;
     position: relative;
     overflow: hidden;
@@ -876,10 +857,4 @@ body {
 
 .terminal-btn svg {
     fill: currentColor;
-}
-
-.terminal-output-wrapper {
-    flex: 1;
-    min-height: 0;
-    overflow: hidden;
 }
