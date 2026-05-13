@@ -25,5 +25,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
             ipcRenderer.removeAllListeners('serial-data');
             ipcRenderer.removeAllListeners('serial-status');
         }
+    },
+    // 终端相关 API
+    terminal: {
+        getAllContent: () => ipcRenderer.invoke('terminal-get-all-content')
     }
 });

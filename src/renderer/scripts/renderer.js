@@ -662,6 +662,39 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             if (toggleAuxBarBtn) toggleAuxBarBtn.click();
         }
+        // Ctrl/Cmd + Shift + C - 复制终端选中的内容，如果没有选中则复制全部
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'C') {
+            e.preventDefault();
+            if (terminal && isXtermReady) {
+                const selection = terminal.getSelection();
+                let textToCopy = selection;
+
+                // 如果没有选中文本，则复制全部内容
+                if (!textToCopy && terminal.buffer && terminal.buffer.active) {
+                    const buffer = terminal.buffer.active;
+                    let allContent = '';
+                    for (let i = 0; i < buffer.length; i++) {
+                        const line = buffer.getLine(i);
+                        if (line) {
+                            allContent += line.translateToString(true) + '\n';
+                        }
+                    }
+                    textToCopy = allContent;
+                }
+
+                if (textToCopy) {
+                    navigator.clipboard.writeText(textToCopy).catch(() => {
+                        // 备用方案
+                        const textarea = document.createElement('textarea');
+                        textarea.value = textToCopy;
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textarea);
+                    });
+                }
+            }
+        }
     });
 
     // ============ 窗口控制 ============
@@ -771,7 +804,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     foreground: '#d4d4d4',
                     cursor: '#ffffff',
                     cursorAccent: '#1e1e1e',
-                    selectionBackground: '#264f78',
+                    selectionBackground: '#0078d4',
                     black: '#1e1e1e',
                     red: '#f44747',
                     green: '#6a9955',
@@ -819,6 +852,114 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 打开终端
             terminal.open(xtermContainer);
+
+            // 确保 xterm 的隐藏 textarea 支持文本选择和复制
+            setTimeout(() => {
+                const textarea = xtermContainer.querySelector('textarea.xterm-helper-textarea');
+                if (textarea) {
+                    textarea.style.userSelect = 'text';
+                    textarea.style.webkitUserSelect = 'text';
+                    textarea.style.MozUserSelect = 'text';
+                    textarea.removeAttribute('readonly');
+                    textarea.removeAttribute('disabled');
+                }
+            }, 100);
+
+            // 右键菜单支持 - 在终端区域显示复制菜单
+            xtermContainer.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+
+                // 获取选中的文本
+                const selection = window.getSelection();
+                const selectedText = selection ? selection.toString().trim() : '';
+
+                // 使用 xterm.js 的 getSelection 方法获取终端内选中内容
+                let clipboardText = selectedText;
+                if (!clipboardText && terminal) {
+                    clipboardText = terminal.getSelection() || '';
+                }
+
+                // 创建右键菜单
+                const contextMenu = document.createElement('div');
+                contextMenu.className = 'xterm-context-menu';
+                contextMenu.innerHTML = `
+                    <div class="context-menu-item ${clipboardText ? '' : 'disabled'}" data-action="copy">
+                        复制 ${clipboardText ? `"${clipboardText.substring(0, 30)}${clipboardText.length > 30 ? '...' : ''}"` : ''}
+                    </div>
+                    <div class="context-menu-item" data-action="copy-all">复制所有内容</div>
+                    <div class="context-menu-separator"></div>
+                    <div class="context-menu-item" data-action="clear">清空终端</div>
+                `;
+
+                // 移除已存在的菜单
+                const existingMenu = document.querySelector('.xterm-context-menu');
+                if (existingMenu) {
+                    existingMenu.remove();
+                }
+
+                // 设置菜单位置
+                contextMenu.style.position = 'fixed';
+                contextMenu.style.left = Math.min(e.clientX, window.innerWidth - 200) + 'px';
+                contextMenu.style.top = Math.min(e.clientY, window.innerHeight - 150) + 'px';
+                contextMenu.style.zIndex = '10000';
+
+                document.body.appendChild(contextMenu);
+
+                // 点击菜单项
+                contextMenu.querySelectorAll('.context-menu-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const action = item.dataset.action;
+
+                        if (action === 'copy' && clipboardText) {
+                            navigator.clipboard.writeText(clipboardText).catch(err => {
+                                // 备用方案
+                                const textarea = document.createElement('textarea');
+                                textarea.value = clipboardText;
+                                document.body.appendChild(textarea);
+                                textarea.select();
+                                document.execCommand('copy');
+                                document.body.removeChild(textarea);
+                            });
+                        } else if (action === 'copy-all') {
+                            // 使用 xterm.js API 获取终端全部内容
+                            if (terminal && terminal.buffer && terminal.buffer.active) {
+                                const buffer = terminal.buffer.active;
+                                let allContent = '';
+                                for (let i = 0; i < buffer.length; i++) {
+                                    const line = buffer.getLine(i);
+                                    if (line) {
+                                        allContent += line.translateToString(true) + '\n';
+                                    }
+                                }
+                                if (allContent) {
+                                    navigator.clipboard.writeText(allContent).catch(err => {
+                                        // 备用方案
+                                        const textarea = document.createElement('textarea');
+                                        textarea.value = allContent;
+                                        document.body.appendChild(textarea);
+                                        textarea.select();
+                                        document.execCommand('copy');
+                                        document.body.removeChild(textarea);
+                                    });
+                                }
+                            }
+                        } else if (action === 'clear') {
+                            clearTerminal();
+                        }
+
+                        contextMenu.remove();
+                    });
+                });
+
+                // 点击其他地方关闭菜单
+                const closeMenu = (ev) => {
+                    if (!contextMenu.contains(ev.target)) {
+                        contextMenu.remove();
+                        document.removeEventListener('click', closeMenu);
+                    }
+                };
+                setTimeout(() => document.addEventListener('click', closeMenu), 0);
+            });
 
             // 适应容器大小 - 延迟一下让容器先完成布局
             if (fitAddon) {

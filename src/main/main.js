@@ -222,3 +222,8 @@ ipcMain.handle('serial-write', async (event, data) => {
 ipcMain.handle('serial-status', () => {
     return { connected: isSerialConnected };
 });
+
+// 获取终端全部内容
+ipcMain.handle('terminal-get-all-content', () => {
+    return '';
+});
