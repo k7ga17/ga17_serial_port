@@ -18,6 +18,11 @@
 npm install
 ```
 
+安装依赖不成功的话，使用以下命令
+```bash
+npm install xterm-addon-web-links@0.6.0 --legacy-peer-deps
+```
+
 ### 运行开发模式
 
 ```bash
